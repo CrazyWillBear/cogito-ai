@@ -1,0 +1,26 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE / editor
+.idea/
+
+# Pytest cache
+.pytest_cache/
+
+# Byte-compiled / optimized / cached files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.env.*
+
+# OS and editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
