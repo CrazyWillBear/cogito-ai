@@ -1,8 +1,14 @@
-from typing import TypedDict
-from langchain_core.messages import BaseMessage
+from agent.research_agent_subgraph.graph import build_recursive_retriever
 
+inputs = {
+    "messages": [
+        {"role": "user", "content": "Where does the sovereign get its authority from?"}
+    ]
+}
 
-class GraphState(TypedDict):
-    output_txt:         str
-    chat_history:       list[BaseMessage]
-    research_needed:    bool
+agent = build_recursive_retriever()
+result = agent.invoke(inputs)
+print("Summary:", result.get('summary', 'No summary available'))
+print("\nMessages:")
+for i in result.get('messages', []):
+    print(i)
