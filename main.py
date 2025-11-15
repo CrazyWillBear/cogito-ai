@@ -1,14 +1,14 @@
-from agent.research_agent_subgraph.graph import build_recursive_retriever
+from langchain_core.messages import HumanMessage, SystemMessage
+
+from agent.research_agent_subgraph.graph import build_research_agent
 
 inputs = {
     "messages": [
-        {"role": "user", "content": "Where does the sovereign get its authority from?"}
+        SystemMessage(content="You are a helpful research assistant."),
+        HumanMessage(content="What makes an act moral according to Hobbes?")
     ]
 }
 
-agent = build_recursive_retriever()
+agent = build_research_agent()
 result = agent.invoke(inputs)
-print("Summary:", result.get('summary', 'No summary available'))
-print("\nMessages:")
-for i in result.get('messages', []):
-    print(i)
+print(result.get('response', 'No response available'))

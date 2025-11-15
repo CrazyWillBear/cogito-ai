@@ -353,9 +353,9 @@ class TestGetHistoryLangchain:
         messages = [
             {"role": "system", "content": "You are a helpful assistant that can query a vector database."},
             {"role": "user", "content": "Hey, can you help me find notes about LangChain?"},
-            {"role": "assistant", "content": "Sure! I found several documents about LangChain. Would you like a summary?"},
+            {"role": "assistant", "content": "Sure! I found several documents about LangChain. Would you like a response?"},
             {"role": "user", "content": "Yes, please summarize them."},
-            {"role": "assistant", "content": "LangChain helps you build LLM-powered apps that use tools and memory to reason through complex tasks."},
+            {"role": "assistant", "content": "LangChain helps you build LLM-powered apps that use embed and memory to reason through complex tasks."},
         ]
         ch.from_json(messages)
         lc_history = ch.get_history_langchain()
@@ -369,7 +369,7 @@ class TestGetHistoryLangchain:
 
         assert lc_history[0].content.startswith("You are a helpful assistant")
         assert "LangChain" in lc_history[1].content
-        assert "Would you like a summary" in lc_history[2].content
+        assert "Would you like a response" in lc_history[2].content
         assert lc_history[3].content == "Yes, please summarize them."
         assert lc_history[4].content.startswith("LangChain helps you build")
 

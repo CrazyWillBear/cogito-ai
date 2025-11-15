@@ -1,14 +1,17 @@
-from agent.models.llama import llama_low_temp
-from agent.research_agent_subgraph.graph import ResearchAgentState
+from langchain_core.messages import SystemMessage, HumanMessage
+
+from agent.models.gpt import gpt_low_temp
+from agent.research_agent_subgraph.graph_state import ResearchAgentState
 
 
 def summarize(state: ResearchAgentState):
     """Summarize the most relevant sources from the research results to inform a response."""
     messages = state["messages"]
     resources = state["resources"]
-    prompt = f"Based on the user's last message, please list the sources that are most relevant and helpful to inform \
-               a response. You should list them as quotes and cite your source. Here are the messages: {messages}\n \
-               Here are the research results: {resources}"
 
-    summary = llama_low_temp.invoke(prompt)
-    return { "summary": summary.content }
+    chat_history = messages + [
+        SystemMessage(content="Use the research resources below to answer, citing sources."),
+        HumanMessage(content=str(resources))
+    ]
+    summary = gpt_low_temp.invoke(chat_history)
+    return { "response": summary.content }
