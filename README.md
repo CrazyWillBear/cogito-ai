@@ -1,10 +1,35 @@
-# Research LangGraph
+# Cogito AI Service (will rename repo later)
 
 ## Overview
 This is the LangGraph/LangChain component of what will become a larger academic research tool. The goal of this project
 is to assist scholars in their research with AI tools, enabling them to gather and analyze information from various
-sources. This project is in *very* early stages of development. For information, keep up with my blog, where I'm writing
-about the development process: [writing.capbear.net](https://writing.capbear.net).
+sources.
+
+## More info
+Please read [my blog post about this project](https://blog.williamchastain.com/Cogito-(Ergo-Sum)) for information about
+the project's current state, goals, and functionality.
+
+## Project Structure
+```aiignore
+embed/*                             # Text embedding model implementation
+chat/*                              # Chat history related code (not used ATM)
+nodes/*                             # LangGraph nodes for what will be the overarching graph (not used ATM)
+ai                                  # AI-related code (agent implementations, LangGraph graphs, etc.)
+├───models/*                        # LLM model implementations (GPT & LLaMA)
+├───nodes/*                         # Nodes for the overarching graph (not used ATM)
+├───research_agent_subgraph         # Subgraph for research agent
+│   │   graph.py                    # Defines the subgraph's nodes and edges
+│   │   graph_state.py              # Defines the subgraph's state
+│   │   query_filter_schemas.py     # Pydantic schemas for query filtering
+│   ├───nodes                       # Defines the subgraph's nodes
+│   │   │   assess_summary.py       # Node to assess summary quality
+│   │   │   check_statisfaction.py  # Node to check satisfaction of query results
+│   │   │   entry.py                # Entry node
+│   │   │   query_vector_db.py      # Node to query vector DB
+│   │   │   summarize.py            # Node to summarize/respond to user
+│   │   │   write_query.py          # Node to write queries for vector DB
+└───util/*                          # Util functions
+```
 
 ## License
 This project is licensed under the PolyForm Noncommercial License 1.0.0. You may use and modify the code for personal,

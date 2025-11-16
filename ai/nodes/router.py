@@ -1,4 +1,4 @@
-from agent.models.llama import llama_low_temp
+from ai.models.llama import llama_low_temp
 
 
 def router(state):

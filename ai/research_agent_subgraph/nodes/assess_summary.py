@@ -1,7 +1,7 @@
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from agent.models.gpt import gpt_low_temp
-from agent.research_agent_subgraph.graph_state import ResearchAgentState
+from ai.models.gpt import gpt_low_temp
+from ai.research_agent_subgraph.graph_state import ResearchAgentState
 
 
 def assess_summary(state: ResearchAgentState):

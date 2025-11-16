@@ -3,18 +3,23 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.models import Filter, MatchValue, FieldCondition
 from rapidfuzz import process
 
-from agent.research_agent_subgraph.graph_state import ResearchAgentState
+from ai.research_agent_subgraph.graph_state import ResearchAgentState
 from embed.embed import embed
 
 VEC_DB_URL = "http://localhost:6333"
 VEC_COLLECTION = "philosophy"
 
+
 def query_vector_db(state: ResearchAgentState):
-    """Query the vector database with the given query and filters."""
-    # Vector db client
+    """
+    Query the vector database with the given query and filters.
+    Uses fuzzy matching to find best-matching authors and sources from PostgreSQL metadata.
+    Returns accumulated resources and increments query count.
+    """
+
+    # --- Initialize database clients ---
     qdrant_client = QdrantClient(VEC_DB_URL)
 
-    # Postgres db client
     conn = psycopg2.connect(
         host="localhost",
         port=5432,
@@ -24,12 +29,12 @@ def query_vector_db(state: ResearchAgentState):
     )
     cur = conn.cursor()
 
-    # Get state variables
+    # --- Extract state variables ---
     query = state.get("query", None)
     vector = embed(query.get("query", ""))
     filters = query.get("filters", None)
 
-    # Build filter conditions
+    # --- Build filter conditions ---
     _filter_conditions = []
     if filters is not None:
         author = filters.get("author")
@@ -54,7 +59,7 @@ def query_vector_db(state: ResearchAgentState):
     # Build filter only if we have conditions
     _filter = Filter(must=_filter_conditions) if _filter_conditions else None
 
-    # Query vector db
+    # --- Query vector database ---
     results = qdrant_client.query_points(
         collection_name=VEC_COLLECTION,
         query=vector,
@@ -62,16 +67,13 @@ def query_vector_db(state: ResearchAgentState):
         query_filter=_filter
     )
 
-    # Append new results to existing resources without overwriting
+    # --- Accumulate results ---
     old_resources = state.get("resources", [])
     new_resources = old_resources + results.points
 
-    # Increment the queries_made count
-    queries_made = state.get("queries_made", 0) + 1
-
-    # Close connections
+    # --- Cleanup connections ---
     cur.close()
     conn.close()
     qdrant_client.close()
 
-    return {"resources": new_resources, "queries_made": queries_made}
+    return {"resources": new_resources}
