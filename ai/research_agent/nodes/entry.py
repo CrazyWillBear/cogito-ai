@@ -1,4 +1,4 @@
-from ai.research_agent_subgraph.graph_state import ResearchAgentState
+from ai.research_agent.schemas.graph_state import ResearchAgentState
 
 
 def entry(state: ResearchAgentState):
@@ -11,8 +11,7 @@ def entry(state: ResearchAgentState):
         "response": None,
         "response_feedback": None,
         "response_satisfied": False,
-        "query": None,
-        "query_filters": None,
+        "queries": None,
         "queries_made":[],
         "resources": [],
         "query_satisfied": False
