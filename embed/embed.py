@@ -1,14 +1,27 @@
-from sentence_transformers import SentenceTransformer
 import numpy as np
+from numpy import float32
+from sentence_transformers import SentenceTransformer
 
-# Load model once globally (don’t re-load inside the function!)
-_embed_model = SentenceTransformer("BAAI/bge-large-en-v1.5", device="cuda")
+
+class Embeder:
+    """Embedder using BAAI/bge-large-en-v1.5 model."""
+
+    def __init__(self):
+        """Initialize the BAAI/bge-large-en-v1.5 model for embedding."""
+
+        self.model = SentenceTransformer("BAAI/bge-large-en-v1.5", device="cuda")
 
 
-def embed(text: str) -> np.ndarray:
-    """Embed text into a dense vector using BAAI/bge-large-en-v1.5."""
-    # Model expects a list of sentences
-    vector = _embed_model.encode([text], normalize_embeddings=True)
+    def embed(self, text: str):
+        """Embed text into a dense vector using BAAI/bge-large-en-v1.5."""
 
-    # encode() returns shape (1, dim) — flatten to (dim,)
-    return np.array(vector[0], dtype=np.float32)
+        # Model expects a list of sentences
+        vector = self.model.encode([text], normalize_embeddings=True)
+
+        return np.array(vector[0], dtype=float32).ravel().tolist()
+
+    def embed_batch(self, texts: list[str]):
+        # Embed a batch of texts into dense vectors using BAAI/bge-large-en-v1.5.
+        vectors = self.model.encode(texts, normalize_embeddings=True)
+
+        return [np.array(vec, dtype=float32).ravel().tolist() for vec in vectors]

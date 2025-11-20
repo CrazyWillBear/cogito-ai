@@ -18,4 +18,4 @@ class QueryAndFilters(BaseModel):
     """
 
     query: str = Field(description="Search query string", default="")
-    filters: Filters = Field(description="Optional filters for the query", default=None)
+    filters: Filters | None = Field(default=None)
