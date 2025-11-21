@@ -1,4 +1,4 @@
-from ai.models.gpt import gpt5_mini, gpt5_nano, gpt5
+from ai.models.gpt import gpt5_nano, gpt5
 
 # Model configuration for graph nodes
 MODEL_CONFIG = {

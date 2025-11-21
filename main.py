@@ -5,26 +5,26 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from ai.subgraphs.research_agent.research_agent import ResearchAgent
 
 START_TEXT = \
-r"""                                                               
-      # ###                                                          
-    /  /###  /                            #                          
-   /  /  ###/                            ###        #                
-  /  ##   ##                              #        ##                
- /  ###                                            ##                
-##   ##           /###        /###      ###      ########    /###    
-##   ##          / ###  /    /  ###  /   ###    ########    / ###  / 
-##   ##         /   ###/    /    ###/     ##       ##      /   ###/  
-##   ##        ##    ##    ##     ##      ##       ##     ##    ##   
-##   ##        ##    ##    ##     ##      ##       ##     ##    ##   
- ##  ##        ##    ##    ##     ##      ##       ##     ##    ##   
-  ## #      /  ##    ##    ##     ##      ##       ##     ##    ##   
-   ###     /   ##    ##    ##     ##      ##       ##     ##    ##   
-    ######/     ######      ########      ### /    ##      ######    
-      ###        ####         ### ###      ##/      ##      ####     
-                                   ###                               
-                             ####   ###                              
-                           /######  /#                               
-                          /     ###/                                 
+r"""
+      # ###
+    /  /###  /                            #
+   /  /  ###/                            ###        #
+  /  ##   ##                              #        ##
+ /  ###                                            ##
+##   ##           /###        /###      ###      ########    /###
+##   ##          / ###  /    /  ###  /   ###    ########    / ###  /
+##   ##         /   ###/    /    ###/     ##       ##      /   ###/
+##   ##        ##    ##    ##     ##      ##       ##     ##    ##
+##   ##        ##    ##    ##     ##      ##       ##     ##    ##
+ ##  ##        ##    ##    ##     ##      ##       ##     ##    ##
+  ## #      /  ##    ##    ##     ##      ##       ##     ##    ##
+   ###     /   ##    ##    ##     ##      ##       ##     ##    ##
+    ######/     ######      ########      ### /    ##      ######
+      ###        ####         ### ###      ##/      ##      ####
+                                   ###
+                             ####   ###
+                           /######  /#
+                          /     ###/
 
 Copyright (c) 2025 William Chastain (williamchastain.com). All rights reserved.
 This software is licensed under the PolyForm Noncommercial License 1.0.0 (https://polyformproject.org/licenses/noncommercial/1.0.0)
@@ -36,7 +36,7 @@ Type 'exit' or 'quit' to end the conversation.
 """
 
 if __name__ == "__main__":
-    """Main entry point for running the Cogito AI research assistant in a console loop."""
+    # Main entry point for running the Cogito AI research assistant in a console loop.
 
     print(START_TEXT)
 
@@ -70,3 +70,6 @@ if __name__ == "__main__":
 
         # Append AI message to conversation
         conversation["messages"].append(AIMessage(content=output))
+
+    # Close agent resources
+    agent.close()

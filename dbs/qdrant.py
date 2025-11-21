@@ -18,22 +18,20 @@ class Qdrant:
     # --- Methods ---
     def __init__(self):
         """Initialize Qdrant database client."""
+
         # --- Initialize database clients ---
         self.client = QdrantClient(url=self.URL, grpc_port=self.PORT, prefer_grpc=True)
         self.postgres_client = PostgresFilters()
         self.embedder = Embeder()
 
-    def __enter__(self):
-        """Enter context manager for Qdrant client."""
-        return self
+    def close(self):
+        """Close Qdrant client connection."""
 
-    def __exit__(self):
-        """Exit context manager for Qdrant client."""
-        # --- Close Qdrant client ---
         self.client.close()
 
     def query(self, query: QueryAndFilters) -> list[dict]:
         """Query the Qdrant vector database with fuzzy-matched filters."""
+
         res = []
         seen_ids = set()
 
@@ -87,9 +85,7 @@ class Qdrant:
     def batch_query(self, queries: list[QueryAndFilters]):
         """Batch query Qdrant with per-query fuzzy filters."""
 
-        results_out = []
-        all_authors = self.postgres_client.all_authors
-        all_sources = self.postgres_client.all_sources
+        all_authors, all_sources = self.postgres_client.all_authors, self.postgres_client.all_sources
 
         # --- Batch embed all query texts ---
         query_texts = [q.query for q in queries]
@@ -148,8 +144,8 @@ class Qdrant:
         )
 
         # --- Convert Qdrant results into your desired payload lists ---
+        seen_ids, results_out = set(), []
         for response in batch_results:
-            seen_ids = set()
             for point in response.points:
                 if point.id not in seen_ids:
                     seen_ids.add(point.id)

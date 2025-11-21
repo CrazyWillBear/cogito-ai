@@ -63,6 +63,12 @@ class ResearchAgent:
 
         self.graph = g.compile()
 
+    def close(self):
+        """Close any database connections used by the Research Agent."""
+
+        self.qdrant.close()
+        self.postgres_filters.close()
+
     @staticmethod
     def _wrap(func: Callable, *args, **kwargs) -> Callable:
         """Wrap a node so it receives `state` plus any extra args/kwargs."""

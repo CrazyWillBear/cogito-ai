@@ -9,7 +9,7 @@
 - [Configuration](#configuration-default-values-are-for-local-testing-will-update-once-containerized)
 - [How it works](#how-it-works-high-level-flow)
 - [Architecture Overview](#architecture-overview)
-- [Licensing](#licensing)
+- [Licensing](#licensing--copyright)
 
 ## Overview
 
@@ -94,6 +94,7 @@ Cogito AI is a Q&A style agentic assistant for philosophy research. It uses Lang
 - `main.py` provides a simple interactive CLI loop for conversation and invoking the research agent.
 
 ## Licensing + Copyright
+
 Copyright (c) William Chastain. All rights reserved.
 
 This software is licensed under the PolyForm Noncommercial License 1.0.0. This project, while open-source, *may not* be used for commercial purposes. See the [LICENSE](LICENSE.md) file for details.

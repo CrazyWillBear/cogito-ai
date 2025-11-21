@@ -7,7 +7,7 @@ import select
 class PostgresFilters:
     """Class to manage PostgreSQL filters with real-time updates."""
 
-    # --- Constants ---
+    # --- Constants (will be replaced with ENV vars soon) ---
     HOST = "localhost"
     PORT = 5432
     DBNAME = "filters"
@@ -16,6 +16,8 @@ class PostgresFilters:
 
     # --- Methods ---
     def __init__(self):
+        """Initialize the PostgreSQL connection and set up real-time updates."""
+
         self.conn = psycopg2.connect(
             host=self.HOST,
             port=self.PORT,
@@ -29,16 +31,14 @@ class PostgresFilters:
 
         self._update_filters()
 
-    def __enter__(self):
-        """Enter the runtime context related to this object."""
-        return self
+    def close(self):
+        """Close the PostgreSQL connection."""
 
-    def __exit__(self):
-        """Exit the runtime context related to this object."""
         self.conn.close()
 
     def listen(self) -> None:
         """Listen for changes in the filters table and update authors and sources accordingly."""
+
         cur = self.conn.cursor()
         cur.execute("LISTEN filter_changes;")
 
@@ -57,6 +57,7 @@ class PostgresFilters:
 
     def _update_filters(self) -> None:
         """Update the list of authors and sources from the database."""
+
         cur = self.conn.cursor()
         cur.execute("SELECT DISTINCT authors FROM filters;")
         self.all_authors = [row[0] for row in cur.fetchall()]
