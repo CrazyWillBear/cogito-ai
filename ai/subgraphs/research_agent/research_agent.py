@@ -23,6 +23,7 @@ class ResearchAgent:
         self.graph = None
         self.qdrant = qdrant if qdrant is not None else Qdrant()
         self.postgres_filters = postgres_filters if postgres_filters is not None else PostgresFilters()
+        self.resources = []
 
     def run(self, conversation: dict) -> str:
         """Invoke the Research Agent subgraph with a conversation."""

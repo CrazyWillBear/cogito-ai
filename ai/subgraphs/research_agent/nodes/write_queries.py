@@ -51,10 +51,11 @@ def write_queries(state: ResearchAgentState):
 
     # Construct prompt (system message and user message)
     system_msg = SystemMessage(content=(
-        "You are a semantic search assistant for philosophical research. Generate targeted search queries based on the"
-        "user's last message and previous context.\n\n"
+        "You are a semantic search assistant for philosophical research. Generate targeted search queries based on the "
+        "user's last message and previous context. If multiple sources or authors are referenced in message, include "
+        "at least one query per.\n\n"
         "Important guidelines:\n"
-        "- Use broader, conceptual queries that capture philosophical topics and debates\n"
+        "- Queries should cover all aspects of the question and provide enough evidence to answer\n"
         "- CRITICAL: Put author/source names in 'filters', NOT in the search query string\n\n"
         "Generate 1 query for simple questions, up to 3 for complex multi-faceted questions.\n\n"
         f"Output strictly as JSON. Here's an example:\n{SAMPLE_RESPONSE}\n"

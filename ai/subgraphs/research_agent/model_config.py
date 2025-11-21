@@ -1,4 +1,4 @@
-from ai.models.gpt import gpt5_mini, gpt5_nano
+from ai.models.gpt import gpt5_mini, gpt5_nano, gpt5
 
 # Model configuration for graph nodes
 MODEL_CONFIG = {
@@ -7,5 +7,5 @@ MODEL_CONFIG = {
     "write_queries": gpt5_nano,
     "assess_resources_classifier": gpt5_nano,
     "assess_resources_feedback": gpt5_nano,
-    "write_response": gpt5_mini
+    "write_response": gpt5
 }

@@ -17,7 +17,7 @@ def summarize_resource(model, resource_text):
         "You are a summarizing agent. Summarize the following resource with these guidelines:\n"
         "- Keep it concise (should be around half the size of original)\n"
         "- Focus on key arguments, concepts, and ideas presented\n"
-        "- Retain any important quotes\n"
+        "- Retain as many full direct quotes as possible\n"
         "- Return the summary in full sentences and paragraphs\n\n"
     ))
 
@@ -43,22 +43,22 @@ def query_vector_db(state: ResearchAgentState, qdrant: Qdrant):
 
     # Extract graph state variables
     queries = state.get("queries")
-    new_resources = []
     old_summaries = state.get("resource_summaries", [])
     new_summaries = old_summaries.copy()
 
     # Query vector DB
+    resources = []
     responses = qdrant.batch_query(queries)
     for payload in responses:
         content = payload.get("text", "")
         author = payload.get("author", "Unknown Author")
         source_title = payload.get("source", "Unknown Source")
         resource_text = f'"""\n{content}\n"""\n- {author}, {source_title}\n'
-        new_resources.append(resource_text)
+        resources.append(resource_text)
 
     # Summarize new resources in parallel
     with ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_resource = {executor.submit(summarize_resource, model, r): r for r in new_resources}
+        future_to_resource = {executor.submit(summarize_resource, model, r): r for r in resources}
         for future in as_completed(future_to_resource):
             summary = future.result()
             new_summaries.append(gpt_extract_content(summary))
