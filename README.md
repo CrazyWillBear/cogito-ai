@@ -95,4 +95,5 @@ Cogito AI is a Q&A style agentic research assistant for philosophy research. It 
 
 ## Licensing + Copyright
 Copyright (c) William Chastain. All rights reserved.
+
 This software is licensed under the PolyForm Noncommercial License 1.0.0. This project, while open-source, *may not* be used for commercial purposes. See the [LICENSE](LICENSE.md) file for details.
