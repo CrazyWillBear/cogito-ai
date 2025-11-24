@@ -45,10 +45,20 @@ message CompletionResponse {
 
 Install gRPC dependencies:
 ```bash
-pip install grpcio grpcio-tools
+pip install -r grpc/requirements.txt
 ```
 
-All other dependencies from the main project's `requirements.txt` must also be installed.
+All other dependencies from the main project's `requirements.txt` must also be installed:
+```bash
+pip install -r requirements.txt
+```
+
+The server requires:
+- Running Qdrant vector database (configured in `dbs/qdrant.py`)
+- Running PostgreSQL database with filter metadata (configured in `dbs/postgres_filters.py`)
+- OpenAI API key or local LLM access (configured in `ai/subgraphs/research_agent/model_config.py`)
+
+See the main [README](../README.md) for detailed setup instructions.
 
 ## Running the Server
 
@@ -69,14 +79,34 @@ By default, the server listens on port `50051`. You can modify the port in the `
 
 **Note:** The `grpc` directory is intentionally not a Python package (no `__init__.py` at package level) to avoid naming conflicts with the `grpcio` library.
 
+## Testing the Server
+
+A test client is provided in `test_client.py`. To test the server:
+
+1. Start the server in one terminal:
+```bash
+cd grpc
+python run_server.py
+```
+
+2. Run the test client in another terminal:
+```bash
+cd grpc  
+python test_client.py
+```
+
 ## Client Example
 
 Here's a simple Python client example:
 
 ```python
-import grpc
 import sys
-sys.path.insert(0, 'grpc')
+import os
+
+# Add grpc directory to path
+sys.path.append('path/to/cogito-ai/grpc')
+
+import grpc
 import cogito_pb2
 import cogito_pb2_grpc
 
@@ -93,8 +123,11 @@ request = cogito_pb2.CompletionRequest(
 )
 
 # Make call
-response = stub.Completion(request)
+response = stub.Completion(request, timeout=300)  # 5 minute timeout
 print(f"Response: {response.response}")
+
+# Close channel
+channel.close()
 ```
 
 ## Regenerating gRPC Code
@@ -106,9 +139,13 @@ cd grpc
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. cogito.proto
 ```
 
-## Notes
+## Architecture Notes
 
-- The server uses a single `ResearchAgent` instance for all requests to optimize resource usage
+- The server uses a **single `ResearchAgent` instance** for all requests to optimize resource usage
+  - The agent maintains connections to Qdrant vector database and PostgreSQL
+  - Reusing the same agent avoids the overhead of repeatedly establishing database connections
+  - The agent's state is reset for each request via the conversation parameter
 - The agent is properly closed when the server shuts down
 - The server uses ThreadPoolExecutor with a configurable number of workers (default: 10)
 - Error handling is implemented to return appropriate gRPC status codes on failures
+- The `grpc` directory is intentionally not a Python package to avoid naming conflicts with the `grpcio` library
