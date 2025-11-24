@@ -37,7 +37,7 @@ def run_test():
                 content="You are a helpful philosophical research assistant."
             ),
             cogito_pb2.Message(
-                role="human",
+                role="user",
                 content="What is epistemology?"
             )
         ]

@@ -30,7 +30,7 @@ message CompletionRequest {
 }
 
 message Message {
-  string role = 1;      // "system", "human", or "ai"
+  string role = 1;      // "system", "user", or "ai"
   string content = 2;   // Message content
 }
 ```
@@ -119,7 +119,7 @@ stub = cogito_pb2_grpc.CogitoServiceStub(channel)
 request = cogito_pb2.CompletionRequest(
     messages=[
         cogito_pb2.Message(role="system", content="You are a helpful philosophical research assistant."),
-        cogito_pb2.Message(role="human", content="What did Plato say about justice?")
+        cogito_pb2.Message(role="user", content="What did Plato say about justice?")
     ]
 )
 

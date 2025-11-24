@@ -78,13 +78,14 @@ class CogitoServicer(cogito_pb2_grpc.CogitoServiceServicer):
                 
                 if role == "system":
                     messages.append(SystemMessage(content=content))
-                elif role == "human":
+                elif role == "user" or role == "human":
+                    # Support both "user" and "human" for compatibility
                     messages.append(HumanMessage(content=content))
                 elif role == "ai":
                     messages.append(AIMessage(content=content))
                 else:
                     # Log warning for unknown roles and default to HumanMessage
-                    logger.warning(f"Unknown message role '{role}', defaulting to 'human'")
+                    logger.warning(f"Unknown message role '{role}', defaulting to 'user'")
                     messages.append(HumanMessage(content=content))
             
             # Create conversation dict for the agent

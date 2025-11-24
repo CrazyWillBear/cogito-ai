@@ -10,7 +10,7 @@ service CogitoService {
 
 // Message structure for chat history
 message Message {
-  string role = 1;      // "system", "human", or "ai"
+  string role = 1;      // "system", "user", or "ai"
   string content = 2;   // Message content
 }
 
