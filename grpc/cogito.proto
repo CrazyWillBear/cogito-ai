@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package cogito;
+
+// Service for Cogito AI research assistant
+service CogitoService {
+  // Completion endpoint that accepts chat history and returns agent response
+  rpc Completion(CompletionRequest) returns (CompletionResponse);
+}
+
+// Message structure for chat history
+message Message {
+  string role = 1;      // "system", "human", or "ai"
+  string content = 2;   // Message content
+}
+
+// Request message for completion
+message CompletionRequest {
+  repeated Message messages = 1;  // Chat history
+}
+
+// Response message for completion
+message CompletionResponse {
+  string response = 1;  // Agent's final response
+}
