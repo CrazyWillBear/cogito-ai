@@ -11,8 +11,9 @@ The gRPC server provides a remote procedure call interface to the Cogito AI agen
 - `cogito.proto` - Protocol Buffer definition for the Cogito service
 - `cogito_pb2.py` - Generated Python protobuf code (auto-generated)
 - `cogito_pb2_grpc.py` - Generated Python gRPC code (auto-generated)
-- `server.py` - gRPC server implementation
-- `__init__.py` - Package initialization
+- `run_server.py` - gRPC server implementation and wrapper script
+- `test_client.py` - Example client for testing the server
+- `requirements.txt` - gRPC-specific dependencies
 
 ## Service Definition
 
