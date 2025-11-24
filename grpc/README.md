@@ -52,14 +52,22 @@ All other dependencies from the main project's `requirements.txt` must also be i
 
 ## Running the Server
 
-From the project root directory:
+From the grpc directory:
 
 ```bash
 cd grpc
-python server.py
+python run_server.py
 ```
 
-By default, the server listens on port `50051`. You can modify the port in the `server.py` file if needed.
+Or from the project root directory:
+
+```bash
+python grpc/run_server.py
+```
+
+By default, the server listens on port `50051`. You can modify the port in the `run_server.py` file if needed.
+
+**Note:** The `grpc` directory is intentionally not a Python package (no `__init__.py` at package level) to avoid naming conflicts with the `grpcio` library.
 
 ## Client Example
 

@@ -4,7 +4,18 @@ Simple test client for the Cogito gRPC server.
 This script demonstrates how to connect to and use the Cogito gRPC service.
 """
 
+import sys
+import os
+
+# Add grpc directory to path for proto imports
+grpc_dir = os.path.dirname(os.path.abspath(__file__))
+if grpc_dir not in sys.path:
+    sys.path.append(grpc_dir)
+
+# Import grpcio library
 import grpc
+
+# Import the generated proto files
 import cogito_pb2
 import cogito_pb2_grpc
 

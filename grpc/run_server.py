@@ -1,24 +1,37 @@
+#!/usr/bin/env python
 """
-gRPC Server implementation for Cogito AI research assistant.
+Wrapper script to run the gRPC server with proper import setup.
 
-This module provides a gRPC server that exposes the ResearchAgent
-through a gRPC interface. The server accepts chat history and returns
-agent responses.
+This script ensures that imports are resolved correctly by running
+the server from the parent directory context.
 """
 
 import sys
 import os
 
-# Add parent directory to path to import project modules
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Get the absolute path to the project root (parent of grpc directory)
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-# Import grpcio package before our local modules to avoid naming conflicts
+# Get the grpc directory path
+grpc_dir = os.path.join(project_root, 'grpc')
+
+# Add project root to sys.path for project modules
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+# Import grpcio library first before adding grpc directory to path
 from concurrent import futures
-import grpc as grpc_lib
+import grpc
 
+# Now add grpc directory for proto files
+if grpc_dir not in sys.path:
+    sys.path.append(grpc_dir)
+
+# Now import project and proto modules
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-
 from ai.subgraphs.research_agent.research_agent import ResearchAgent
+
+# Import the generated proto files
 import cogito_pb2
 import cogito_pb2_grpc
 
@@ -75,7 +88,7 @@ class CogitoServicer(cogito_pb2_grpc.CogitoServiceServicer):
             
         except Exception as e:
             # Handle errors gracefully
-            context.set_code(grpc_lib.StatusCode.INTERNAL)
+            context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(f"Error processing request: {str(e)}")
             return cogito_pb2.CompletionResponse(response="")
 
@@ -94,7 +107,7 @@ def serve(port=50051, max_workers=10):
         max_workers: Maximum number of worker threads (default: 10)
     """
     # Create server with thread pool
-    server = grpc_lib.server(futures.ThreadPoolExecutor(max_workers=max_workers))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
     
     # Create and register servicer
     servicer = CogitoServicer()
