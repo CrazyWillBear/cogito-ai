@@ -8,6 +8,11 @@ the server from the parent directory context.
 
 import sys
 import os
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Get the absolute path to the project root (parent of grpc directory)
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -46,8 +51,10 @@ class CogitoServicer(cogito_pb2_grpc.CogitoServiceServicer):
 
     def __init__(self):
         """Initialize the servicer with a single ResearchAgent instance."""
+        logger.info("Initializing ResearchAgent...")
         self.agent = ResearchAgent()
         self.agent.build()
+        logger.info("ResearchAgent initialized and ready")
 
     def Completion(self, request, context):
         """
@@ -61,6 +68,8 @@ class CogitoServicer(cogito_pb2_grpc.CogitoServiceServicer):
             CompletionResponse with the agent's final response
         """
         try:
+            logger.info(f"Processing completion request with {len(request.messages)} messages")
+            
             # Convert gRPC messages to LangChain message format
             messages = []
             for msg in request.messages:
@@ -74,20 +83,24 @@ class CogitoServicer(cogito_pb2_grpc.CogitoServiceServicer):
                 elif role == "ai":
                     messages.append(AIMessage(content=content))
                 else:
-                    # Default to HumanMessage for unknown roles
+                    # Log warning for unknown roles and default to HumanMessage
+                    logger.warning(f"Unknown message role '{role}', defaulting to 'human'")
                     messages.append(HumanMessage(content=content))
             
             # Create conversation dict for the agent
             conversation = {"messages": messages}
             
             # Run the agent
+            logger.info("Invoking ResearchAgent...")
             response = self.agent.run(conversation)
+            logger.info("Agent completed successfully")
             
             # Return the response
             return cogito_pb2.CompletionResponse(response=response)
             
         except Exception as e:
             # Handle errors gracefully
+            logger.error(f"Error processing request: {str(e)}", exc_info=True)
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(f"Error processing request: {str(e)}")
             return cogito_pb2.CompletionResponse(response="")
@@ -95,7 +108,9 @@ class CogitoServicer(cogito_pb2_grpc.CogitoServiceServicer):
     def close(self):
         """Close agent resources when server shuts down."""
         if self.agent:
+            logger.info("Closing ResearchAgent resources...")
             self.agent.close()
+            logger.info("ResearchAgent resources closed")
 
 
 def serve(port=50051, max_workers=10):
@@ -118,14 +133,15 @@ def serve(port=50051, max_workers=10):
     
     # Start server
     server.start()
-    print(f"Cogito gRPC server started on port {port}")
+    logger.info(f"Cogito gRPC server started on port {port}")
     
     try:
         server.wait_for_termination()
     except KeyboardInterrupt:
-        print("\nShutting down server...")
+        logger.info("\nShutting down server...")
         servicer.close()
         server.stop(0)
+        logger.info("Server stopped")
 
 
 if __name__ == '__main__':
