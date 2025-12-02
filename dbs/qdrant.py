@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import MatchValue, FieldCondition, Filter
 from rapidfuzz import process
@@ -10,17 +13,18 @@ from embed.embed import Embeder
 class Qdrant:
     """Qdrant vector database client with fuzzy-matched filtering."""
 
-    # --- Constants ---
-    URL = "localhost"
-    PORT = 6334
-    COLLECTION = "philosophy"
-
     # --- Methods ---
     def __init__(self):
         """Initialize Qdrant database client."""
 
+        load_dotenv()
+        url = os.getenv("COGITO_QDRANT_URL")
+        port = int(os.getenv("COGITO_QDRANT_PORT", "6334"))
+        api_key = os.getenv("COGITO_QDRANT_API_KEY")
+        self.collection = os.getenv("COGITO_QDRANT_COLLECTION")
+
         # --- Initialize database clients ---
-        self.client = QdrantClient(url=self.URL, grpc_port=self.PORT, prefer_grpc=True)
+        self.client = QdrantClient(url=url, grpc_port=port, api_key=api_key, prefer_grpc=True, https=False)
         self.postgres_client = PostgresFilters()
         self.embedder = Embeder()
 
@@ -29,63 +33,12 @@ class Qdrant:
 
         self.client.close()
 
-    def query(self, query: QueryAndFilters) -> list[dict]:
-        """Query the Qdrant vector database with fuzzy-matched filters."""
-
-        res = []
-        seen_ids = set()
-
-        all_authors = self.postgres_client.all_authors
-        all_sources = self.postgres_client.all_sources
-
-        vector = self.embedder.embed(query.query)
-        filters = query.filters
-
-        # Build filter conditions
-        _filter_conditions = []
-        if filters is not None:
-            author = filters.author
-            source_title = filters.source_title
-
-            # Fuzzy match author
-            if author is not None:
-                best_author = process.extractOne(author, all_authors)
-                if best_author:
-                    _filter_conditions.append(
-                        FieldCondition(key="author", match=MatchValue(value=best_author[0]))
-                    )
-
-            # Fuzzy match source
-            if source_title is not None:
-                best_source = process.extractOne(source_title, all_sources)
-                if best_source:
-                    _filter_conditions.append(
-                        FieldCondition(key="source", match=MatchValue(value=best_source[0]))
-                    )
-
-        # Build filter only if we have conditions
-        _filter = Filter(must=_filter_conditions) if _filter_conditions else None
-
-        # Query vector database
-        results = self.client.query_points(
-            collection_name=self.COLLECTION,
-            query=vector,
-            limit=2,
-            query_filter=_filter
-        )
-
-        # Deduplicate points and add to resources
-        for point in results.points:
-            if point.id not in seen_ids:
-                seen_ids.add(point.id)
-                res.append(point.payload)
-
-        return res
-
     def batch_query(self, queries: list[QueryAndFilters]):
         """Batch query Qdrant with per-query fuzzy filters."""
 
-        all_authors, all_sources = self.postgres_client.all_authors, self.postgres_client.all_sources
+        author_sources = self.postgres_client.author_sources
+        all_authors = list(author_sources.keys())
+        all_sources = self.postgres_client.all_sources
 
         # --- Batch embed all query texts ---
         query_texts = [q.query for q in queries]
@@ -101,24 +54,32 @@ class Qdrant:
                 conditions = []
                 f = q.filters
 
-                # fuzzy match author
+                selected_author = None
+
+                # fuzzy match author (if provided)
                 if f.author:
                     best_author = process.extractOne(f.author, all_authors)
                     if best_author:
+                        selected_author = best_author[0]
                         conditions.append(
                             FieldCondition(
                                 key="author",
-                                match=MatchValue(value=best_author[0])
+                                match=MatchValue(value=selected_author)
                             )
                         )
 
-                # fuzzy match source
+                # fuzzy match source with scoped candidate set
                 if f.source_title:
-                    best_source = process.extractOne(f.source_title, all_sources)
+                    if selected_author and author_sources.get(selected_author):
+                        candidate_sources = author_sources[selected_author]
+                    else:
+                        candidate_sources = all_sources
+
+                    best_source = process.extractOne(f.source_title, candidate_sources)
                     if best_source:
                         conditions.append(
                             FieldCondition(
-                                key="source",
+                                key="source_title",
                                 match=MatchValue(value=best_source[0])
                             )
                         )
@@ -139,7 +100,7 @@ class Qdrant:
 
         # --- Execute all queries in a single batch ---
         batch_results = self.client.query_batch_points(
-            collection_name=self.COLLECTION,
+            collection_name=self.collection,
             requests=search_requests
         )
 

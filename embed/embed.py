@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from numpy import float32
 from sentence_transformers import SentenceTransformer
 
@@ -6,14 +7,12 @@ from sentence_transformers import SentenceTransformer
 class Embeder:
     """Embedder using BAAI/bge-large-en-v1.5 model."""
 
-    # --- Constants ---
-    DEVICE = "cuda"
-
     # --- Methods ---
     def __init__(self):
         """Initialize the BAAI/bge-large-en-v1.5 model for embedding."""
 
-        self.model = SentenceTransformer("BAAI/bge-large-en-v1.5", device=self.DEVICE)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = SentenceTransformer("BAAI/bge-large-en-v1.5", device=self.device)
 
 
     def embed(self, text: str):
@@ -28,5 +27,6 @@ class Embeder:
         """Embed a list of texts into dense vectors using BAAI/bge-large-en-v1.5."""
 
         vectors = self.model.encode(texts, normalize_embeddings=True)
+        out = [np.array(vec, dtype=float32).ravel().tolist() for vec in vectors]
 
-        return [np.array(vec, dtype=float32).ravel().tolist() for vec in vectors]
+        return out

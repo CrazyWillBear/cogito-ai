@@ -19,25 +19,25 @@ def write_response(state: ResearchAgentState):
     model = MODEL_CONFIG["write_response"]
 
     # Extract graph state variables
-    resource_summaries = state.get("resource_summaries", "No research resources collected yet.")
+    resources = state.get("resources", "No research resources collected yet.")
     conversation = state.get("conversation", {})
     conv_summary = conversation.get("summarized_context", "No prior context needed.")
     last_message = conversation.get("last_user_message", "No last user message found")
 
     # Construct prompt (system message and user message)
     system_msg = SystemMessage(content=(
-        "Respond to the user's last message given the following resources that you've 'researched'. Use specific "
-        "quotes, respond in a conversational yet academic tone, and cite all sources at the end using this format: "
-        "'(author last, author first; title)'. DO NOT reference or cite the summaries themselves, only the sources "
-        "they are from. Only quote evidence when it's from the original source. Respond directly to the message in a"
-        "tightly-organized manner.\n\n"
+        "Respond to the user's last message given the following resources that you've 'researched'. Use specific cited "
+        "quotes, respond in a conversational yet academic tone, and cite all sources using the `citation` given. "
+        "You don't need to copy the citation exactly, use what seems right, but don't use information not given and "
+        "also make sure to include the full range of section(s)/chapter(s)/etc., the author, and the source in your "
+        "citations. Respond directly to the message in a tightly-organized manner.\n\n"
         "Consider:\n"
         "- What is the user's main question or message?\n"
-        "- What resources are most relevant to the message/question?\n"
-        "- What is the answer and how do the sources support it?\n"
+        "- What parts of the resources are most relevant to the message/question?\n"
+        "- What is the answer and how do those parts support it?\n"
         "- How can I best structure my response to be compact and direct yet with specific evidence?\n"
         f"Here is a summary of the conversation previous to the user's message:\n{conv_summary}\n\n"
-        f"Here are the research resources you've gathered so far:\n{resource_summaries}"
+        f"Here are the research resources you've gathered so far:\n{resources}\n"
     ))
 
     user_msg = HumanMessage(content=last_message)

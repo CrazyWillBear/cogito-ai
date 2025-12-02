@@ -9,23 +9,30 @@ from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
 from dbs.qdrant import Qdrant
 
 
-def summarize_resource(model, resource_text):
-    """Summarize a single research resource using the provided model."""
+def extract_text(model, resource_text, user_query):
+    """Extract relevant text from the resource based on the user's query using the given model."""
 
     # Construct prompt (system and user message)
     system_msg = SystemMessage(content=(
-        "You are a summarizing agent. Summarize the following resource with these guidelines:\n"
-        "- Keep it concise (should be around half the size of original)\n"
-        "- Focus on key arguments, concepts, and ideas presented\n"
-        "- Retain as many full direct quotes as possible\n"
-        "- Return the summary in full sentences and paragraphs\n\n"
+        "You are a text extraction agent. Extract text relevant to the user's query given the following guidelines:\n"
+        "- Total text extracted can range from the entire source text to half the length of the source text.\n"
+        "- Focus on relevant arguments, concepts, and ideas presented.\n"
+        "- Only EXTRACT TEXT, do not SUMMARIZE, do not FORMULATE ARGUMENTS, do not address parts of the question "
+        "unrelated to the source you've been given (for example, if the question addresses multiple philosophers, only "
+        "extract text relevant to the philosopher from which the source is written by or about). You should only extract sections of text.\n\n"
+        "User query:\n"
+        f"{user_query}\n"
     ))
 
-    user_msg = HumanMessage(content=f"Here is a resource to summarize:\n---\n{resource_text}\n---\n")
+    user_msg = HumanMessage(content=(
+        "Here is the source text:\n"
+        f"{resource_text}"
+    ))
 
     # Invoke model and return extracted output
     res = model.invoke([system_msg, user_msg], reasoning={"effort": "minimal"})
-    return gpt_extract_content(res)
+    citation = '; '.join(resource_text.split('\n')[-2:])  # Extract citation from resource text
+    return (gpt_extract_content(res) + '\n' + citation).strip()
 
 def query_vector_db(state: ResearchAgentState, qdrant: Qdrant):
     """
@@ -35,7 +42,7 @@ def query_vector_db(state: ResearchAgentState, qdrant: Qdrant):
     """
 
     # Start timing and log
-    print("::Querying vector database and summarizing sources...", end="", flush=True)
+    print("::Querying vector database and extracting text...", end="", flush=True)
     start = time.perf_counter()
 
     # Get configured model
@@ -43,28 +50,36 @@ def query_vector_db(state: ResearchAgentState, qdrant: Qdrant):
 
     # Extract graph state variables
     queries = state.get("queries")
-    old_summaries = state.get("resource_summaries", [])
-    new_summaries = old_summaries.copy()
+    user_query = state.get("conversation", {}).get("last_user_message", "No last user message found")
+    old_resources = state.get("resources", [])
+    new_resources = old_resources.copy()
 
     # Query vector DB
+    try:
+        responses = qdrant.batch_query(queries)
+    except Exception as e:
+        print(f"\r\033[K::Vector DB batch query failed: {e}")
+        return {"resources": new_resources}
+
     resources = []
-    responses = qdrant.batch_query(queries)
     for payload in responses:
         content = payload.get("text", "")
         author = payload.get("author", "Unknown Author")
-        source_title = payload.get("source", "Unknown Source")
-        resource_text = f'"""\n{content}\n"""\n- {author}, {source_title}\n'
+        source_title = payload.get("source_title", "Unknown Source")
+        citation = payload.get("citations", "No Citation Provided")
+
+        resource_text = f'"""\n{content}\n"""\n- From: ({author}, {source_title})\nCitation: "{citation}"'
         resources.append(resource_text)
 
     # Summarize new resources in parallel
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_resource = {executor.submit(summarize_resource, model, r): r for r in resources}
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        future_to_resource = {executor.submit(extract_text, model, r, user_query): r for r in resources}
         for future in as_completed(future_to_resource):
             summary = future.result()
-            new_summaries.append(gpt_extract_content(summary))
+            new_resources.append(gpt_extract_content(summary))
 
     # End timing and log
     end = time.perf_counter()
-    print(f"\r\033[K::Vector database queried and sources summarized in {end - start:.2f}s")
+    print(f"\r\033[K::Vector database queried and sources extracted in {end - start:.2f}s")
 
-    return {"resource_summaries": new_summaries}
+    return {"resources": new_resources}

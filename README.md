@@ -1,100 +1,119 @@
 # Cogito AI
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Usage](#usage)
-- [Configuration](#configuration-default-values-are-for-local-testing-will-update-once-containerized)
-- [How it works](#how-it-works-high-level-flow)
-- [Architecture Overview](#architecture-overview)
-- [Licensing](#licensing--copyright)
-
-## Overview
-
-Cogito AI is a Q&A style agentic assistant for philosophy research. It uses LangGraph/LangChain components, vector search, and LLMs to gather, assess, and summarize primary philosophical sources to build detailed answers with citations.
+An agentic Q&A research assistant for philosophy that uses vector search and LLMs to gather, assess, and synthesize answers from primary philosophical sources.
 
 ## Features
 
-- Conversation normalization and summarization.
-- Structured query generation for semantic search (with optional author/source filters).
-- Batched vector DB queries ([Qdrant](https://qdrant.tech/)) with fuzzy matching to stored metadata ([PostgreSQL](https://www.postgresql.org/)).
-- Parallel summarization of retrieved resources.
-- Resource sufficiency classifier (Yes/No) with optional feedback generation.
-- Final response generation with citations and quoted evidence.
+- Semantic search across 166,480+ philosophy text embeddings from Project Gutenberg
+- Conversation-aware query generation with author/source filtering
+- Parallel resource retrieval and summarization
+- Iterative research with resource sufficiency assessment
+- Citation-backed responses with quoted evidence
 
 ## Prerequisites
 
-- Python 3.10+ and `pip install -r requirements.txt`
-- GPU strongly recommended for the default embedding model (`BAAI/bge-large-en-v1.5`) used by `sentence-transformers`. CPU runs are possible but much slower and may require changing the embedder device.
-- Running services (I plan to containerize and publish databases later):
-  - Qdrant vector DB (local or remote).
-  - PostgreSQL containing filter metadata (authors/sources) used by `PostgresFilters` (the code expects a DB named `filters` by default).
-- LLM access (change model usage in `ai/subgraphs/research_agent/model_config.py` as needed):
-  - OpenAI-compatible API keys if using `langchain_openai.ChatOpenAI` models (used in `ai/models/gpt.py`) — set `OPENAI_API_KEY`.
-  - Ollama or local LLM for `langchain_ollama.ChatOllama`.
+- Python 3.10+
+- Linux / macOS / WSL (not Windows)
+- Docker (for databases)
+- GPU strongly recommended for embeddings (CPU possible but slower)
+- OpenAI API key or local LLM setup (configuration required)
 
-## Usage
+## Quick Start
 
-1. Create and activate a Python virtual environment:
-    ```bash
-    python -m venv .venv
-    source venv/bin/activate
-    ```
-2. Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3. Configure database connections in `dbs/qdrant.py` and `dbs/postgres_filters.py`.
-4. Set `OPENAI_API_KEY` environment variable or configure local LLM access as needed in `ai/subgraphs/research_agent/model_config.py`.
-5. Run the interactive CLI:
+### 1. Set up databases
 
-    ```bash
-    python main.py
-    ```
-   
-## Configuration (default values are for local testing; will update once containerized)
+Pull and run the pre-populated databases:
+```bash
+# Qdrant vector database (philosophy embeddings, only uses gRPC)
+docker run -d \
+  -p 6334:6334 \
+  -e QDRANT__SERVICE__API_KEY=your-secret-key \
+  --name cogito-qdrant \
+  crazywillbear/cogito-qdrant:v1
 
-- Qdrant client (`dbs/qdrant.py`)
-  - URL (default: `"localhost"`)
-  - PORT (default: `6334`)
-  - COLLECTION (default: `"philosophy"`)
-- PostgreSQL client(`dbs/postgres_filters.py`)
-  - HOST (default: `"localhost"`)
-  - PORT (default: `5432`)
-  - DBNAME (default: `"filters"`)
-  - USER (default: `"munir"`)
-  - PASSWORD (default: `"123"`)
-- Embeddings (`embed/embed.py`)
-  - DEVICE (default: `"cuda"` if GPU available, else `"cpu"`)
-- LLM Models (`ai/subgraphs/research_agent/model_config.py`)
-  - Change model classes and parameters as needed for your LLM access.
+# PostgreSQL filters database (metadata)
+docker run -d \
+  -p 5432:5432 \
+  --name cogito-postgres \
+  crazywillbear/cogito-postgres-filters:v1
+```
 
-## How it works (high-level flow)
+**Default PostgreSQL credentials** (these are NOT TO BE USED in production):
+- Username: `newuser`
+- Password: `newpass123`
+- Database: `filters`
 
-1. The user interacts through `main.py`; the last human message + conversation history are normalized in `create_conversation`.
-2. `write_queries` produces structured queries (JSON schema `QueryAndFilters`) for semantic search.
-3. `query_vector_db` batch-queries Qdrant using embedded queries, then summarizes retrieved documents (parallelized).
-4. `assess_resources` decides if sufficient research exists; if not, the loop writes new queries and fetches more resources.
-5. Once satisfied, `summarize` synthesizes a final answer that cites the gathered sources.
+### 2. Set up Python environment
+```bash
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate
 
-## Architecture Overview
+# Install dependencies
+pip install -r requirements.txt
+```
 
-- The agent is implemented as a small state graph in `ResearchAgent` (see `ai/subgraphs/research_agent/research_agent.py`).
-- Individual nodes live in `ai/subgraphs/research_agent/nodes/`:
-  - `create_conversation.py` — normalize and summarize incoming conversation/history.
-  - `write_queries.py` — produce structured vector search queries (Pydantic models).
-  - `query_vector_db.py` — call Qdrant, summarize retrieved resources in parallel.
-  - `assess_resources.py` — decide whether more search is needed, optionally produce feedback.
-  - `summarize.py` — synthesize final response using gathered research.
-- Model configuration per-node is in `ai/subgraphs/research_agent/model_config.py`.
-- Vector DB client wraps Qdrant and fuzzily maps filters to author/source names in Postgres (`dbs/qdrant.py`).
-- Embeddings: `embed/embed.py` wraps [SentenceTransformers](https://huggingface.co/sentence-transformers) ([BAAI/bge-large-en-v1.5](https://huggingface.co/BAAI/bge-large-en-v1.5) by default).
-- `main.py` provides a simple interactive CLI loop for conversation and invoking the research agent.
+### 3. Configure environment variables
 
-## Licensing + Copyright
+Copy `.env.example` to `.env` and update with your credentials:
+```bash
+cp .env.example .env
+```
 
-Copyright (c) William Chastain. All rights reserved.
+Edit `.env`:
+```
+# Qdrant Configuration
+COGITO_QDRANT_URL=localhost
+COGITO_QDRANT_PORT=6334
+COGITO_QDRANT_API_KEY=your-secret-key
+COGITO_QDRANT_COLLECTION=philosophy
 
-This software is licensed under the PolyForm Noncommercial License 1.0.0. This project, while open-source, *may not* be used for commercial purposes. See the [LICENSE](LICENSE.md) file for details.
+# PostgreSQL Configuration
+COGITO_POSTGRES_HOST=localhost
+COGITO_POSTGRES_PORT=5432
+COGITO_POSTGRES_DBNAME=filters
+COGITO_POSTGRES_USER=newuser
+COGITO_POSTGRES_PASSWORD=newpass123
+
+# OpenAI (or configure local LLM)
+OPENAI_API_KEY=your-openai-key
+```
+
+### 4. Run
+```bash
+python main.py
+```
+
+## Databases
+
+### Qdrant Vector Database
+- **166,480 embeddings** from Project Gutenberg philosophy texts
+- Chunked with metadata (chapter, section, source, authors)
+- Collection: `philosophy`
+- [Docker Hub](https://hub.docker.com/repository/docker/crazywillbear/cogito-qdrant)
+
+### PostgreSQL Filters Database
+- Metadata for filtering by author and source
+- Table: `filters`
+- [Docker Hub](https://hub.docker.com/repository/docker/crazywillbear/cogito-postgres-filters)
+
+## Architecture & Important Files (quick map)
+
+- `main.py` — CLI loop and `ResearchAgent` bootstrap.
+- `ai/subgraphs/research_agent/` — research orchestration graph, nodes, and model mapping.
+  - `model_config.py` — node-to-model mapping.
+  - `research_agent.py` — orchestrates graph execution.
+- `ai/models/` — model factory helpers (e.g., `gpt.py`, `llama.py`).
+- `dbs/` — qdrant and postgres wrappers (`qdrant.py`, `postgres_filters.py`, `query.py`).
+- `embed/` — embedding logic (`embed.py`).
+
+## Configuration
+
+- **LLM configuration**: See `ai/subgraphs/research_agent/model_config.py`
+- **Database connections**: Configured via `.env` file
+
+## License
+
+Copyright (c) 2025 William Chastain. All rights reserved.
+
+This software is licensed under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). This project is source‑available, but non‑commercial. See [LICENSE](LICENSE.md) for details.

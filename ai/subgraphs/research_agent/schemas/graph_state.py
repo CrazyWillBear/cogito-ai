@@ -15,4 +15,4 @@ class ResearchAgentState(TypedDict):
     queries_feedback: str       # Feedback for research queries
     query_satisfied: bool       # If the query results were satisfactory
 
-    resource_summaries: list    # Recap summaries of the resources
+    resources: list             # Resources

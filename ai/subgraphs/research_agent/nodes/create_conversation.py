@@ -67,7 +67,7 @@ def create_conversation(state: ResearchAgentState):
     state.setdefault('queries', [])
     state.setdefault('queries_feedback', '')
     state.setdefault('query_satisfied', False)
-    state.setdefault('resource_summaries', list())
+    state.setdefault('resources', list())
 
     # End timing and log
     end = time.perf_counter()

@@ -7,7 +7,7 @@ from ai.subgraphs.research_agent.model_config import MODEL_CONFIG
 from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
 
 # Max queries allowed
-MAX_SOURCES = 3
+MAX_SOURCES = 100
 
 def get_feedback(last_message, resource_summaries):
     """Get feedback on why the current research resources are insufficient to answer the user's query."""
@@ -18,13 +18,13 @@ def get_feedback(last_message, resource_summaries):
     # Build feedback prompt (system and user message)
     feedback_system_msg = SystemMessage(content=(
         "You are an assistant that provides feedback on why the current research resources are insufficient to answer "
-        "the user's query. Provide specific reasons and suggestions for what additional research is needed.\n"
+        "the user's query. Provide specific guidelines for further queries, not criticisms of current results, summaries, etc.\n"
     ))
 
     feedback_user_msg = HumanMessage(content=(
         f"Here is the user's last message:\n{last_message}\n\n"
         f"Here are summaries of the research results obtained so far:\n{resource_summaries}\n"
-        "Explain why this research is insufficient and what additional research is needed."
+        "Provide guidance for further queries, what sources they may need to be from, what they should be about, etc."
     ))
 
     # Invoke feedback model and extract output
@@ -42,7 +42,7 @@ def assess_resources(state: ResearchAgentState):
 
     # Extract graph state variables
     conversation = state.get("conversation", {})
-    resource_summaries = state.get("resource_summaries") or "No research resources collected yet."
+    resources = state.get("resources") or "No research resources collected yet."
 
     # Get configured model
     classifier_model = MODEL_CONFIG["assess_resources_classifier"]
@@ -50,15 +50,15 @@ def assess_resources(state: ResearchAgentState):
     # Build prompt (system and user message)
     system_msg = SystemMessage(content=(
         "You are a reasoning assistant that evaluates whether the provided research is sufficient to answer the user's query.\n"
-        "Decide if the current research can support a satisfactory answer now. Just make sure it at least covers all"
-        "aspects of the question.\n\n"
+        "Decide if the current research can support a satisfactory answer. Just make sure it at least covers all "
+        "aspects of the question. It doesn't need to be perfect nor does it need to be FULLY comprehensive.\n\n"
         "Return NOTHING but 'Yes' if the research is sufficient, or 'No' if more research is needed.\n"
     ))
 
     last_message = conversation.get("last_user_message", "No last user message found")
     user_msg = HumanMessage(content=(
         f"Here is the user's last message:\n{last_message}\n\n"
-        f"Here are summaries of the research results obtained so far:\n{resource_summaries}\n"
+        f"Here are summaries of the research results obtained so far:\n{resources}\n"
     ))
 
     # Invoke model and extract output
@@ -67,7 +67,7 @@ def assess_resources(state: ResearchAgentState):
 
     # If not satisfied, get feedback on what additional research is needed
     if not query_satisfied:
-        feedback = get_feedback(last_message, resource_summaries)
+        feedback = get_feedback(last_message, resources)
     else:
         feedback = ""
 
@@ -75,5 +75,5 @@ def assess_resources(state: ResearchAgentState):
     end = time.perf_counter()
     print(f"\r\033[K::Resources assessed in {end - start:.2f}s")
 
-    return {"query_satisfied": query_satisfied or len(resource_summaries) >= MAX_SOURCES, "queries_feedback": feedback}
+    return {"query_satisfied": query_satisfied or len(resources) >= MAX_SOURCES, "queries_feedback": feedback}
 

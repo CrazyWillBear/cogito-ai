@@ -17,7 +17,6 @@ __pycache__/
 
 # Environment files
 .env
-.env.*
 
 # OS and editor artifacts
 .DS_Store
