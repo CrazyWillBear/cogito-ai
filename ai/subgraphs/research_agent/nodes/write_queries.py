@@ -27,7 +27,8 @@ SAMPLE_RESPONSE = \
     },
     {
         "query": "..."
-    }
+    },
+    ...
 ]
 """
 
@@ -51,15 +52,20 @@ def write_queries(state: ResearchAgentState):
 
     # Construct prompt (system message and user message)
     system_msg = SystemMessage(content=(
-        "You are a semantic search assistant for philosophical research. Generate targeted search queries based on the "
-        "user's last message and previous context. If multiple sources or authors are referenced in message, include "
-        "at least one query per. These aren't requests for an LLM nor are they necessarily questions, these are queries "
-        "for a vector database.\n\n"
-        "Important guidelines:\n"
-        "- Queries should, combine, cover all aspects of the question and provide enough evidence to answer\n"
-        "- CRITICAL: Put author/source names in 'filters', NOT in the search query string\n\n"
-        "Generate 1 query for simple questions, up to 3 for complex multi-faceted questions.\n\n"
-        f"Output strictly as JSON. Here's an example:\n{SAMPLE_RESPONSE}\n"
+        "You are a semantic-search assistant for philosophical research.\n" 
+        "Your output is a JSON object containing a list of vector-DB search queries.\n\n"
+        
+        "Your task for each user message:\n"
+        "1. Identify the key philosophical concepts, debates, and authors implied.\n"
+        "2. Plan what evidence would be needed to answer the question fully.\n"
+        "3. During planning, think about what philosophers and primary sources should be included to give a full genealogy of the idea/concept.\n"
+        "4. If the user names authors/sources, put them ONLY in 'filters', not in the query text.\n"
+        "5. Use short, dense query strings (keywords, not questions).\n"
+        "6. Generate as little as 1 query for simple prompts or up to 6 for complex ones.\n"
+        "7. Avoid redundancy.\n\n"
+        
+        "Output strictly in this structure:\n"
+        f"{SAMPLE_RESPONSE}\n"
     ))
 
     conv_summary = conversation.get("summarized_context", "No prior context.")
@@ -71,7 +77,7 @@ def write_queries(state: ResearchAgentState):
     ))
 
     # Invoke LLM with structured output
-    result = structured_model.invoke([system_msg, user_msg], reasoning={"effort": "low"})
+    result = structured_model.invoke([system_msg, user_msg], reasoning={"effort": "medium"})
 
     # Stop timing and log
     end = time.perf_counter()

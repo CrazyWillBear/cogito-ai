@@ -57,7 +57,7 @@ def create_conversation(state: ResearchAgentState):
     summarized = gpt_extract_content(result)
 
     # Create conversation object
-    conversation: Conversation = {
+    conversation = {
         'last_user_message': last_user,
         'summarized_context': summarized,
     }

@@ -26,18 +26,27 @@ def write_response(state: ResearchAgentState):
 
     # Construct prompt (system message and user message)
     system_msg = SystemMessage(content=(
-        "Respond to the user's last message given the following resources that you've 'researched'. Use specific cited "
-        "quotes, respond in a conversational yet academic tone, and cite all sources using the `citation` given. "
-        "You don't need to copy the citation exactly, use what seems right, but don't use information not given and "
-        "also make sure to include the full range of section(s)/chapter(s)/etc., the author, and the source in your "
-        "citations. Respond directly to the message in a tightly-organized manner.\n\n"
-        "Consider:\n"
-        "- What is the user's main question or message?\n"
-        "- What parts of the resources are most relevant to the message/question?\n"
-        "- What is the answer and how do those parts support it?\n"
-        "- How can I best structure my response to be compact and direct yet with specific evidence?\n"
-        f"Here is a summary of the conversation previous to the user's message:\n{conv_summary}\n\n"
-        f"Here are the research resources you've gathered so far:\n{resources}\n"
+        "Respond to the user’s latest message using only the provided research resources.\n"
+        "Write in a clear, conversational academic tone.\n"
+        "Use specific quoted evidence with citations at each quote containing:\n"
+        "- author\n"
+        "- source title\n"
+        "- section/chapter range provided in the resource\n"
+        "...and NOT containing §pgepubid tags or any other kinds of §id tags.\n"
+        "Cite ALL quotes used in the response.\n"
+        "In the following format: (\"quoted text\" (Author, Source Title, Sections/Chapter/etc. X-Y)).\n"
+        
+        "Guidelines:\n"
+        "- Answer the user’s question directly.\n"
+        "- Select only the most relevant parts of the resources.\n"
+        "- Organize the response tightly (clean structure, minimal fluff).\n"
+        "- Do not use information outside the resources.\n"
+        
+        "Context summary:\n"
+        f"{conv_summary}\n"
+        
+        "Resources:"
+        f"{resources}"
     ))
 
     user_msg = HumanMessage(content=last_message)

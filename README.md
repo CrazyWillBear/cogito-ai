@@ -38,7 +38,7 @@ docker run -d \
   crazywillbear/cogito-postgres-filters:v1
 ```
 
-**Default PostgreSQL credentials** (these are NOT TO BE USED in production):
+**Default PostgreSQL credentials** (don't use these in a production environment):
 - Username: `newuser`
 - Password: `newpass123`
 - Database: `filters`

@@ -7,9 +7,9 @@ from ai.subgraphs.research_agent.model_config import MODEL_CONFIG
 from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
 
 # Max queries allowed
-MAX_SOURCES = 100
+MAX_SOURCES = 10
 
-def get_feedback(last_message, resource_summaries):
+def get_feedback(last_message, resources):
     """Get feedback on why the current research resources are insufficient to answer the user's query."""
 
     # Get configured feedback model
@@ -17,13 +17,15 @@ def get_feedback(last_message, resource_summaries):
 
     # Build feedback prompt (system and user message)
     feedback_system_msg = SystemMessage(content=(
-        "You are an assistant that provides feedback on why the current research resources are insufficient to answer "
-        "the user's query. Provide specific guidelines for further queries, not criticisms of current results, summaries, etc.\n"
+        "You are an assistant that provides feedback on why the current research resources might be insufficient to answer "
+        "the user's query. Provide specific guidelines for further queries, not criticisms of current results, "
+        "summaries, etc.\n\n"
+        "Limit your response to 400-500 tokens total text extracted per response.\n"
     ))
 
     feedback_user_msg = HumanMessage(content=(
         f"Here is the user's last message:\n{last_message}\n\n"
-        f"Here are summaries of the research results obtained so far:\n{resource_summaries}\n"
+        f"Here are the resources obtained so far:\n{resources}\n"
         "Provide guidance for further queries, what sources they may need to be from, what they should be about, etc."
     ))
 
@@ -49,20 +51,24 @@ def assess_resources(state: ResearchAgentState):
 
     # Build prompt (system and user message)
     system_msg = SystemMessage(content=(
-        "You are a reasoning assistant that evaluates whether the provided research is sufficient to answer the user's query.\n"
-        "Decide if the current research can support a satisfactory answer. Just make sure it at least covers all "
-        "aspects of the question. It doesn't need to be perfect nor does it need to be FULLY comprehensive.\n\n"
-        "Return NOTHING but 'Yes' if the research is sufficient, or 'No' if more research is needed.\n"
+        "You are a classifier assistant that classified the research as either sufficient or insufficient to answer "
+        "the user's query. Some things to consider:\n"
+        "- Does the research cover the main concepts and arguments implied by the user's query?\n"
+        "- If the user named specific authors or sources, they ALL MUST BE included in the resources, not just mentioned in them.\n"
+        "- Most questions tend to require between 3-5 sources to be adequately answered. Only when necessary should you "
+        "consider the research insufficient with more than 5 sources.\n\n"
+        "Respond with NOTHING BUT a single word: 'YES' if the research is sufficient to answer the user's query, "
+        "or 'NO' if it is not sufficient.\n"
     ))
 
     last_message = conversation.get("last_user_message", "No last user message found")
     user_msg = HumanMessage(content=(
         f"Here is the user's last message:\n{last_message}\n\n"
-        f"Here are summaries of the research results obtained so far:\n{resources}\n"
+        f"Here are research results obtained so far:\n{resources}\n"
     ))
 
     # Invoke model and extract output
-    result = classifier_model.invoke([system_msg, user_msg], reasoning={"effort": "minimal"})
+    result = classifier_model.invoke([system_msg, user_msg], reasoning={"effort": "low"})
     query_satisfied = gpt_extract_content(result).strip().lower() == "yes"  # yes = True, otherwise False
 
     # If not satisfied, get feedback on what additional research is needed

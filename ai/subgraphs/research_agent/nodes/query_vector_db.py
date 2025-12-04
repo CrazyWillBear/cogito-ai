@@ -9,8 +9,11 @@ from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
 from dbs.qdrant import Qdrant
 
 
-def extract_text(model, resource_text, user_query):
-    """Extract relevant text from the resource based on the user's query using the given model."""
+def extract_text(resource_text, user_query):
+    """Subnode to extract relevant text from the resource based on the user's query using the given model."""
+
+    # Get configured model
+    model = MODEL_CONFIG["query_vector_db"]
 
     # Construct prompt (system and user message)
     system_msg = SystemMessage(content=(
@@ -45,9 +48,6 @@ def query_vector_db(state: ResearchAgentState, qdrant: Qdrant):
     print("::Querying vector database and extracting text...", end="", flush=True)
     start = time.perf_counter()
 
-    # Get configured model
-    model = MODEL_CONFIG["query_vector_db"]
-
     # Extract graph state variables
     queries = state.get("queries")
     user_query = state.get("conversation", {}).get("last_user_message", "No last user message found")
@@ -73,7 +73,7 @@ def query_vector_db(state: ResearchAgentState, qdrant: Qdrant):
 
     # Summarize new resources in parallel
     with ThreadPoolExecutor(max_workers=6) as executor:
-        future_to_resource = {executor.submit(extract_text, model, r, user_query): r for r in resources}
+        future_to_resource = {executor.submit(extract_text, r, user_query): r for r in resources}
         for future in as_completed(future_to_resource):
             summary = future.result()
             new_resources.append(gpt_extract_content(summary))
