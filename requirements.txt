@@ -9,4 +9,4 @@ python-dotenv==1.2.1
 qdrant_client==1.16.2
 rapidfuzz==3.14.3
 sentence_transformers==5.1.2
-torch==2.5.1+cu121
+torch==2.5.1
