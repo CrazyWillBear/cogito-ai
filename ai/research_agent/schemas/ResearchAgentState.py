@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from ai.subgraphs.research_agent.schemas.conversation import Conversation
+from ai.research_agent.schemas.Conversation import Conversation
 
 
 class ResearchAgentState(TypedDict):

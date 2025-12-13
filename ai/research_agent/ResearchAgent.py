@@ -3,14 +3,14 @@ from typing import Callable
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 
-from ai.subgraphs.research_agent.nodes.assess_resources import assess_resources
-from ai.subgraphs.research_agent.nodes.create_conversation import create_conversation
-from ai.subgraphs.research_agent.nodes.query_vector_db import query_vector_db
-from ai.subgraphs.research_agent.nodes.write_queries import write_queries
-from ai.subgraphs.research_agent.nodes.write_response import write_response
-from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
-from dbs.postgres_filters import PostgresFilters
-from dbs.qdrant import Qdrant
+from ai.research_agent.nodes.assess_resources import assess_resources
+from ai.research_agent.nodes.create_conversation import create_conversation
+from ai.research_agent.nodes.query_vector_db import query_vector_db
+from ai.research_agent.nodes.write_queries import write_queries
+from ai.research_agent.nodes.write_response import write_response
+from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
+from dbs.Postgres import Postgres
+from dbs.Qdrant import Qdrant
 
 
 class ResearchAgent:
@@ -22,7 +22,7 @@ class ResearchAgent:
 
         self.graph = None
         self.qdrant = qdrant if qdrant is not None else Qdrant()
-        self.postgres_filters = postgres_filters if postgres_filters is not None else PostgresFilters()
+        self.postgres_filters = postgres_filters if postgres_filters is not None else Postgres()
         self.resources = []
 
     def run(self, conversation: dict) -> str:
@@ -41,7 +41,7 @@ class ResearchAgent:
         # --- Initialize graph ---
         g = StateGraph(ResearchAgentState)
 
-        # --- Add nodes ---
+        # --- Add agent_assigner ---
         g.add_node("create_conversation", create_conversation)
         g.add_node("write_queries", write_queries)
         g.add_node("query_vector_db", self._wrap(query_vector_db, self.qdrant))

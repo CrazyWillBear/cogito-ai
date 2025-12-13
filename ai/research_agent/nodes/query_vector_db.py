@@ -4,9 +4,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from langchain_core.messages import SystemMessage, HumanMessage
 
 from ai.models.gpt import gpt_extract_content
-from ai.subgraphs.research_agent.model_config import MODEL_CONFIG
-from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
-from dbs.qdrant import Qdrant
+from ai.models.model_config import MODEL_CONFIG
+from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
+from dbs.Qdrant import Qdrant
 
 
 def extract_text(resource_text, user_query):

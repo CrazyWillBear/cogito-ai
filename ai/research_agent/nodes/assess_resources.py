@@ -3,8 +3,9 @@ import time
 from langchain_core.messages import SystemMessage, HumanMessage
 
 from ai.models.gpt import gpt_extract_content
-from ai.subgraphs.research_agent.model_config import MODEL_CONFIG
-from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
+from ai.models.model_config import MODEL_CONFIG
+from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
+
 
 # Max queries allowed
 MAX_SOURCES = 10

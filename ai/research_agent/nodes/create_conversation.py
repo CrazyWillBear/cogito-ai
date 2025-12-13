@@ -4,9 +4,8 @@ from typing import List
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from ai.models.gpt import gpt_extract_content
-from ai.subgraphs.research_agent.model_config import MODEL_CONFIG
-from ai.subgraphs.research_agent.schemas.conversation import Conversation
-from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
+from ai.models.model_config import MODEL_CONFIG
+from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 
 
 def create_conversation(state: ResearchAgentState):

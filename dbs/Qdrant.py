@@ -5,9 +5,9 @@ from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import MatchValue, FieldCondition, Filter
 from rapidfuzz import process
 
-from dbs.postgres_filters import PostgresFilters
+from dbs.Postgres import Postgres
 from dbs.query import QueryAndFilters
-from embed.embed import Embeder
+from embed.Embedder import Embedder
 
 
 class Qdrant:
@@ -25,8 +25,8 @@ class Qdrant:
 
         # --- Initialize database clients ---
         self.client = QdrantClient(url=url, grpc_port=port, api_key=api_key, prefer_grpc=True, https=False)
-        self.postgres_client = PostgresFilters()
-        self.embedder = Embeder()
+        self.postgres_client = Postgres()
+        self.embedder = Embedder()
 
     def close(self):
         """Close Qdrant client connection."""

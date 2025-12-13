@@ -1,8 +1,11 @@
 import time
+from datetime import datetime
+from pathlib import Path
 
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, messages_to_dict
 
-from ai.subgraphs.research_agent.research_agent import ResearchAgent
+from ai.research_agent.ResearchAgent import ResearchAgent
+
 
 START_TEXT = \
 r"""
@@ -34,6 +37,14 @@ Type 'exit' or 'quit' to end the conversation.
 
 -=-=-=-
 """
+
+def write_logs(logs: str):
+    """Helper function to write logs to console."""
+
+
+    p = Path(f"logs/agent_logs{datetime.now()}.txt")
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(logs)
 
 if __name__ == "__main__":
     # Main entry point for running the Cogito AI research assistant in a console loop.
@@ -74,3 +85,5 @@ if __name__ == "__main__":
     # Close agent resources
     agent.close()
 
+    # Print final conversation as dict
+    write_logs(str(messages_to_dict(conversation.get("messages", []))))

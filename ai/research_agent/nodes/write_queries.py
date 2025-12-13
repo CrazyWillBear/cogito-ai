@@ -3,8 +3,8 @@ import time
 from langchain_core.messages import SystemMessage, HumanMessage
 from pydantic import BaseModel
 
-from ai.subgraphs.research_agent.model_config import MODEL_CONFIG
-from ai.subgraphs.research_agent.schemas.graph_state import ResearchAgentState
+from ai.models.model_config import MODEL_CONFIG
+from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from dbs.query import QueryAndFilters
 
 

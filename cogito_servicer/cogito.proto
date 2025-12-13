@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package cogito;
+
+service Cogito {
+    rpc Ask (Question) returns (Answer);
+}
+
+message Question {
+    string user_id = 1;
+    string conversation_id = 2;
+    string agent = 3;
+}
+
+message Answer {
+    string content = 1;
+}

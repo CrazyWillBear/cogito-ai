@@ -1,0 +1,17 @@
+.git/
+.idea/
+.gitignore
+.env
+
+# Virtual environment directories
+.venv/
+venv/
+
+# Python cache files
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.tox/

@@ -81,7 +81,7 @@ OPENAI_API_KEY=your-openai-key
 
 ### 4. Run
 ```bash
-python main.py
+python main_cli.py
 ```
 
 ## Databases

@@ -18,6 +18,9 @@ __pycache__/
 # Environment files
 .env
 
+# Logs
+logs/
+
 # OS and editor artifacts
 .DS_Store
 Thumbs.db

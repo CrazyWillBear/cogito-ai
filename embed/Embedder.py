@@ -4,7 +4,7 @@ from numpy import float32
 from sentence_transformers import SentenceTransformer
 
 
-class Embeder:
+class Embedder:
     """Embedder using BAAI/bge-large-en-v1.5 model."""
 
     # --- Methods ---
