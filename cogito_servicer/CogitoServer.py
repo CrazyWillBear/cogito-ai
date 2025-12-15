@@ -14,11 +14,11 @@ def _run_agent_task(agent: ResearchAgent, conversation: dict) -> str:
     return agent.run(conversation)
 
 
-class CogitoServicer(cogito_pb2_grpc.CogitoServicer):
+class CogitoServer(cogito_pb2_grpc.CogitoServicer):
     """gRPC servicer for the Cogito AI research assistant."""
 
     def __init__(self, agent: ResearchAgent, postgres_db: Postgres):
-        """Initialize the CogitoServicer with a ResearchAgent and Postgres database."""
+        """Initialize the CogitoServer with a ResearchAgent and Postgres database."""
 
         self.agent = agent
         self.postgres_db = postgres_db

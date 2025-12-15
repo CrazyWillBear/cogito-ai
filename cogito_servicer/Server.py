@@ -4,7 +4,7 @@ import grpc
 
 from ai.research_agent.ResearchAgent import ResearchAgent
 from cogito_servicer import cogito_pb2_grpc
-from cogito_servicer.CogitoServicer import CogitoServicer
+from cogito_servicer.CogitoServer import CogitoServer
 from dbs.Postgres import Postgres
 
 
@@ -29,7 +29,7 @@ class Server:
             postgres_db = Postgres()
 
         # Add Cogito servicer to server
-        servicer = CogitoServicer(agent, postgres_db)
+        servicer = CogitoServer(agent, postgres_db)
         cogito_pb2_grpc.add_CogitoServicer_to_server(servicer, self.server)
 
     def start(self):

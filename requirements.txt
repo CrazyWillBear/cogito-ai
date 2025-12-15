@@ -1,4 +1,5 @@
-grpcio
+grpcio>=1.76.0
+grpcio-tools>=1.76.0
 langchain_core
 langgraph
 langchain-openai
@@ -10,4 +11,3 @@ python-dotenv
 qdrant_client
 rapidfuzz
 sentence_transformers
-torch

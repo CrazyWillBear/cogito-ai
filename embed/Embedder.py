@@ -1,32 +1,25 @@
-import numpy as np
-import torch
-from numpy import float32
-from sentence_transformers import SentenceTransformer
+import os
+
+from openai import OpenAI
 
 
 class Embedder:
-    """Embedder using BAAI/bge-large-en-v1.5 model."""
+    """Embedder using OpenAI's text-embedding-3-small model."""
 
     # --- Methods ---
     def __init__(self):
-        """Initialize the BAAI/bge-large-en-v1.5 model for embedding."""
+        """Initialize OpenAI client."""
 
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = SentenceTransformer("BAAI/bge-large-en-v1.5", device=self.device)
-
-
-    def embed(self, text: str):
-        """Embed text into a dense vector using BAAI/bge-large-en-v1.5."""
-
-        # Model expects a list of sentences
-        vector = self.model.encode([text], normalize_embeddings=True)
-
-        return np.array(vector[0], dtype=float32).ravel().tolist()
+        key = os.getenv("OPENAI_API_KEY")
+        self.client = OpenAI(api_key=key)
 
     def embed_batch(self, texts: list[str]):
-        """Embed a list of texts into dense vectors using BAAI/bge-large-en-v1.5."""
+        """Embed a list of texts into dense vectors using text-embedding-3-small model."""
 
-        vectors = self.model.encode(texts, normalize_embeddings=True)
-        out = [np.array(vec, dtype=float32).ravel().tolist() for vec in vectors]
+        response = self.client.embeddings.create(
+            model="text-embedding-3-small",
+            input=texts
+        )
+        out = [d.embedding for d in response.data]
 
         return out

@@ -24,17 +24,17 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11grpc/cogito.proto\x12\x06\x63ogito\"C\n\x08Question\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\t\x12\r\n\x05\x61gent\x18\x03 \x01(\t\"\x19\n\x06\x41nswer\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t21\n\x06\x43ogito\x12\'\n\x03\x41sk\x12\x10.cogito.Question\x1a\x0e.cogito.Answerb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x63ogito_servicer/cogito.proto\x12\x06\x63ogito\"C\n\x08Question\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\t\x12\r\n\x05\x61gent\x18\x03 \x01(\t\"\x19\n\x06\x41nswer\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t21\n\x06\x43ogito\x12\'\n\x03\x41sk\x12\x10.cogito.Question\x1a\x0e.cogito.Answerb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'cogito_servicer.cogito_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_QUESTION']._serialized_start=29
-  _globals['_QUESTION']._serialized_end=96
-  _globals['_ANSWER']._serialized_start=98
-  _globals['_ANSWER']._serialized_end=123
-  _globals['_COGITO']._serialized_start=125
-  _globals['_COGITO']._serialized_end=174
+  _globals['_QUESTION']._serialized_start=40
+  _globals['_QUESTION']._serialized_end=107
+  _globals['_ANSWER']._serialized_start=109
+  _globals['_ANSWER']._serialized_end=134
+  _globals['_COGITO']._serialized_start=136
+  _globals['_COGITO']._serialized_end=185
 # @@protoc_insertion_point(module_scope)
