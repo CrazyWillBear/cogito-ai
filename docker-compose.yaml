@@ -15,7 +15,7 @@ services:
     depends_on:
       - qdrant
     ports:
-      - "8000:8000"
+      - "50051:50051"
     restart: unless-stopped
 
   qdrant:
