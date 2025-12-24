@@ -38,7 +38,9 @@ def write_response(state: ResearchAgentState):
         "- Organize the response tightly (clean structure, minimal fluff).\n"
         "- NEVER, EVER, UNDER ANY CIRCUMSTANCES use information outside the resources or make up information/research.\n"
         "- Do not comment on the quality of research. After all, it's YOUR research.\n"
-        "- Don't use super complex vocab, define complex terms as needed.\n\n"
+        "- Don't use super complex vocab, define complex terms as needed.\n"
+        "- SEP articles often have weird spacing. Use whatever spacing feels natural in your quotes and citations (there "
+        "are random line breaks and missing whitespaces where there should be).\n\n"
 
         "Your capabilities (ONLY mention these if asked what you can do):\n"
         "- Perform philosophical research by searching Project Gutenberg sources\n"

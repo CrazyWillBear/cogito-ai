@@ -153,7 +153,7 @@ def write_queries(state: ResearchAgentState):
         f"{SEP_SEARCH_RULES}\n\n"
 
         "## LIMITS TO QUERIES:\n"
-        "- Unlimited Vector DB queries (try to limit to 8 max)\n"
+        "- Unlimited Vector DB queries (try to limit to 4-5 max)\n"
         "- MAX 2 SEP queries\n\n"
 
         "## IMPORTANT REMINDERS\n"
