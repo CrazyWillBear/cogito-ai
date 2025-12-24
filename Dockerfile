@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Set the working directory to project root
 WORKDIR /app
 
-# Install system deps if needed (add packages here)
+# Install system deps if needed
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
  && rm -rf /var/lib/apt/lists/*
@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the project
 COPY . /app
 
-# If your server listens on a port, expose it (adjust as needed)
+# Expose server listening port
 EXPOSE 50051
 
 # Run the server from project root
