@@ -1,16 +1,9 @@
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
-import requests
-from langchain_core.messages import SystemMessage, HumanMessage
-
-from ai.models.gpt import gpt_extract_content
-from ai.models.model_config import MODEL_CONFIG
-from ai.research_agent.nodes.sources.sep import query_sep
-from ai.research_agent.nodes.sources.vector_db import query_vector_db
+from ai.research_agent.sources.sep import query_sep
+from ai.research_agent.sources.vector_db import query_vector_db
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from dbs.Qdrant import Qdrant
-from dbs.QueryAndFilterSchemas import QueryAndFilters
 
 
 def query_sources(state: ResearchAgentState, qdrant: Qdrant):

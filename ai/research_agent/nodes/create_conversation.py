@@ -1,6 +1,7 @@
 import time
 from typing import List
 
+import tiktoken
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from ai.models.gpt import gpt_extract_content
@@ -36,7 +37,9 @@ def create_conversation(state: ResearchAgentState):
     context = '\n'.join(context_parts) if context_parts else ''
 
     token_limit = 6000
-    if len(context.split(' ')) / 4 > token_limit:  # Rough token limit check
+    tokenizer = tiktoken.encoding_for_model("gpt-5-mini")
+    tokens = len(tokenizer.encode(context))
+    if tokens > token_limit:
         model, reasoning = MODEL_CONFIG["create_conversation_summary"]
 
         # Build prompt (system and user message)

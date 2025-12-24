@@ -1,7 +1,10 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import requests
+import tiktoken
 from bs4 import BeautifulSoup
 
-from ai.research_agent.nodes.sources.extract_text import extract_text
+from ai.research_agent.sources.extract_text import extract_text
 
 
 def _search_sep(query, limit=100):
@@ -80,6 +83,7 @@ def query_sep(queries: list[str], last_user_msg: str):
     """Query Stanford Encyclopedia of Philosophy and return extracted texts with citations."""
 
     res = []
+    extract_needed = []
     limit = 1
 
     for query in queries:
@@ -88,14 +92,26 @@ def query_sep(queries: list[str], last_user_msg: str):
         for result in search_results:
             article_text, citation = _get_article_text(result['url'])
             if article_text:
-                article_token_limit = 5000
-                if len(article_text.split(" ")) / 3 > article_token_limit:
-                    article_text, _ = extract_text(article_text, last_user_msg)
+                article_token_limit = 6500
+                tokenizer = tiktoken.encoding_for_model("gpt-5-mini")
+                tokens = len(tokenizer.encode(article_text))
+
+                if tokens > article_token_limit:
+                    extract_needed.append((article_text, last_user_msg, citation))
 
                 res.append({
                     'title': result['title'],
                     'article_text': article_text,
                     'citation': "Stanford Encyclopedia of Philosophy; " + citation
                 })
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        future_to_resource = {executor.submit(extract_text, resource[0], resource[1], resource[2]): resource for resource in extract_needed}
+        for future in as_completed(future_to_resource):
+            result, citation = future.result()
+            res.append({
+                'extracted_article_text': result,
+                'citation': 'Stanford Encyclopedia of Philosophy; ' + citation
+            })
 
     return res
