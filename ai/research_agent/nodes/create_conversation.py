@@ -12,11 +12,8 @@ def create_conversation(state: ResearchAgentState):
     """Initialize a new conversation by summarizing prior messages and extracting the last user message."""
 
     # Start timing and log
-    print("::Starting conversation and summarization...", end="", flush=True)
+    print("::Starting conversation...", end="", flush=True)
     start = time.perf_counter()
-
-    # Get configured model
-    model = MODEL_CONFIG["create_conversation"]
 
     # Extract incoming raw messages
     if 'messages' in state and isinstance(state['messages'], list):
@@ -38,38 +35,54 @@ def create_conversation(state: ResearchAgentState):
     ]
     context = '\n'.join(context_parts) if context_parts else ''
 
-    # Build prompt (system and user message)
-    system_msg = SystemMessage(content=(
-        "You are a conversation summarizer. Your job is to summarize the conversation between the user and the AI "
-        "assistant, focusing on the key points discussed, questions asked, and any relevant context that would help.\n"
-        "Your summary should at most half the length of the original conversation. If there is no conversation, just "
-        "say 'Conversation is empty.'"
-    ))
+    token_limit = 6000
+    if len(context.split(' ')) / 4 > token_limit:  # Rough token limit check
+        model, reasoning = MODEL_CONFIG["create_conversation_summary"]
 
-    user_msg = HumanMessage(content=(
-        "Conversation history:\n"
-        f"{context}\n\n"
-    ))
+        # Build prompt (system and user message)
+        system_msg = SystemMessage(content=(
+            "You are a conversation summarizer. Your job is to summarize the conversation between the user and the AI "
+            "assistant, focusing on the key points discussed, questions asked, and any relevant context that would help.\n"
+            "Your summary should at most half the length of the original conversation. If there is no conversation, just "
+            "say 'Conversation is empty.'"
+        ))
 
-    # Invoke model and extract content
-    result = model.invoke([system_msg, user_msg], reasoning={"effort": "minimal"})
-    summarized = gpt_extract_content(result)
+        user_msg = HumanMessage(content=(
+            "Conversation history:\n"
+            f"{context}\n\n"
+        ))
+
+        # Invoke model and extract content
+        result = model.invoke([system_msg, user_msg], reasoning={"effort": reasoning})
+        context = gpt_extract_content(result)
 
     # Create conversation object
     conversation = {
         'last_user_message': last_user,
-        'summarized_context': summarized,
+        'context': context,
     }
 
     # Initialize remaining required keys in state
     state.setdefault('response', '')
-    state.setdefault('queries', [])
+    state.setdefault('vector_db_queries', [])
+    state.setdefault('sep_queries', [])
     state.setdefault('queries_feedback', '')
     state.setdefault('query_satisfied', False)
+    state.setdefault('needs_research', True)
     state.setdefault('resources', list())
 
     # End timing and log
     end = time.perf_counter()
     print(f"\r\033[K::Conversation initialized in {end - start:.2f}s")
 
-    return {"conversation": conversation, "messages": []}
+    return {
+        "conversation": conversation,
+        "messages": [],
+        'response': state['response'],
+        'vector_db_queries': state['vector_db_queries'],
+        'sep_queries': state['sep_queries'],
+        'queries_feedback': state['queries_feedback'],
+        'query_satisfied': state['query_satisfied'],
+        'needs_research': state['needs_research'],
+        'resources': state['resources']
+    }

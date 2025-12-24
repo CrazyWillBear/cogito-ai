@@ -1,12 +1,19 @@
 # Cogito AI
 
-An agentic Q&A research assistant for philosophy that uses vector search and LLMs to gather, assess, and synthesize answers from primary philosophical sources.
+## One-liner
+
+An Q&A-style AI agent for philosophy research that searches various sources to gather evidence and synthesize answers.
+
+## Summary
+
+Cogito AI is an AI research assistant designed to help users explore philosophical questions by searching authoritative sources like the Stanford Encyclopedia of Philosophy and a curated set of Project Gutenberg texts. It leverages LLMs to generate context-aware queries, retrieve relevant sources, and synthesize well-supported answers with full citations.
 
 ## Features
 
-- Semantic search across 166,480+ philosophy text embeddings from Project Gutenberg
+- Search across the Stanford Encyclopedia of Philosophy
+- Semantic search across 1000+ select Project Gutenberg philosophy sources
 - Conversation-aware query generation with author/source filtering
-- Parallel resource retrieval and summarization
+- Parallel resource retrieval and text-extraction
 - Iterative research with resource sufficiency assessment
 - Citation-backed responses with quoted evidence
 
@@ -14,9 +21,8 @@ An agentic Q&A research assistant for philosophy that uses vector search and LLM
 
 - Python 3.10+
 - Linux / macOS / WSL (not Windows)
-- Docker (for databases)
-- GPU strongly recommended for embeddings (CPU possible but slower)
-- OpenAI API key or local LLM setup (configuration required)
+- Docker
+- OpenAI API key or local LLM setup (configuration required for local LLMs)
 
 ## Quick Start
 
@@ -25,23 +31,18 @@ An agentic Q&A research assistant for philosophy that uses vector search and LLM
 Pull and run the pre-populated databases:
 ```bash
 # Qdrant vector database (philosophy embeddings, only uses gRPC)
-docker run -d \
-  -p 6334:6334 \
+docker run -p 6333:6333 -p 6334:6334 \
   -e QDRANT__SERVICE__API_KEY=your-secret-key \
-  --name cogito-qdrant \
-  crazywillbear/cogito-qdrant:v1
+  crazywillbear/cogito-vectors:latest
 
 # PostgreSQL filters database (metadata)
 docker run -d \
   -p 5432:5432 \
-  --name cogito-postgres \
-  crazywillbear/cogito-postgres-filters:v1
+  -e POSTGRES_USER=your-username \
+  -e POSTGRES_PASSWORD=your-password \
+  -e POSTGRES_DB=cogito \
+  crazywillbear/cogito-filters-postgres:latest
 ```
-
-**Default PostgreSQL credentials** (don't use these in a production environment):
-- Username: `newuser`
-- Password: `newpass123`
-- Database: `filters`
 
 ### 2. Set up Python environment
 ```bash
@@ -55,7 +56,7 @@ pip install -r requirements.txt
 
 ### 3. Configure environment variables
 
-Copy `.env.example` to `.env` and update with your credentials:
+Copy `.env.example` to `.env` and update with the credentials you defined above:
 ```bash
 cp .env.example .env
 ```
@@ -71,9 +72,9 @@ COGITO_QDRANT_COLLECTION=philosophy
 # PostgreSQL Configuration
 COGITO_POSTGRES_HOST=localhost
 COGITO_POSTGRES_PORT=5432
-COGITO_POSTGRES_DBNAME=filters
-COGITO_POSTGRES_USER=newuser
-COGITO_POSTGRES_PASSWORD=newpass123
+COGITO_POSTGRES_DBNAME=cogito
+COGITO_POSTGRES_USER=your_user_here
+COGITO_POSTGRES_PASSWORD=your_password_here
 
 # OpenAI (or configure local LLM)
 OPENAI_API_KEY=your-openai-key
@@ -81,35 +82,39 @@ OPENAI_API_KEY=your-openai-key
 
 ### 4. Run
 ```bash
+# For terminal interface
 python main_cli.py
+
+# For gRPC server
+python main_server.py
 ```
 
 ## Databases
 
 ### Qdrant Vector Database
-- **166,480 embeddings** from Project Gutenberg philosophy texts
-- Chunked with metadata (chapter, section, source, authors)
-- Collection: `philosophy`
-- [Docker Hub](https://hub.docker.com/repository/docker/crazywillbear/cogito-qdrant)
+- **212,248 embeddings** from Project Gutenberg philosophy texts
+- Chunked with metadata (section, source title, author(s))
+- Collection: ``
+- [Docker Hub](https://hub.docker.com/repository/docker/crazywillbear/cogito-vectors)
 
 ### PostgreSQL Filters Database
 - Metadata for filtering by author and source
 - Table: `filters`
-- [Docker Hub](https://hub.docker.com/repository/docker/crazywillbear/cogito-postgres-filters)
+- [Docker Hub](https://hub.docker.com/repository/docker/crazywillbear/cogito-filters-postgres)
 
 ## Architecture & Important Files (quick map)
 
-- `main.py` — CLI loop and `ResearchAgent` bootstrap.
-- `ai/subgraphs/research_agent/` — research orchestration graph, nodes, and model mapping.
-  - `model_config.py` — node-to-model mapping.
-  - `research_agent.py` — orchestrates graph execution.
-- `ai/models/` — model factory helpers (e.g., `gpt.py`, `llama.py`).
-- `dbs/` — qdrant and postgres wrappers (`qdrant.py`, `postgres_filters.py`, `query.py`).
-- `embed/` — embedding logic (`embed.py`).
+- `main_cli.py` — CLI loop.
+- `main_server.py` — gRPC server entrypoint.
+- `cogito_servicer/` — gRPC server implementation.
+- `ai/research_agent/` — research agent graph, nodes, and schemas.
+- `ai/models/model_config.py` — model + reasoning effort config per LLM call.
+- `dbs/` — Qdrant and PostgreSQL classes.
+- `embed/` — embedding logic.
 
 ## Configuration
 
-- **LLM configuration**: See `ai/subgraphs/research_agent/model_config.py`
+- **LLM configuration**: See `ai/models/model_config.py`
 - **Database connections**: Configured via `.env` file
 
 ## License

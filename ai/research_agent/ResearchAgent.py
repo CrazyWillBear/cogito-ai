@@ -4,8 +4,9 @@ from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 
 from ai.research_agent.nodes.assess_resources import assess_resources
+from ai.research_agent.nodes.classify_research_needed import classify_research_needed
 from ai.research_agent.nodes.create_conversation import create_conversation
-from ai.research_agent.nodes.query_vector_db import query_vector_db
+from ai.research_agent.nodes.query_sources import query_sources
 from ai.research_agent.nodes.write_queries import write_queries
 from ai.research_agent.nodes.write_response import write_response
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
@@ -43,22 +44,27 @@ class ResearchAgent:
 
         # --- Add agent_assigner ---
         g.add_node("create_conversation", create_conversation)
+        g.add_node("classify_research_needed", classify_research_needed)
         g.add_node("write_queries", write_queries)
-        g.add_node("query_vector_db", self._wrap(query_vector_db, self.qdrant))
+        g.add_node("query_sources", self._wrap(query_sources, self.qdrant))
         g.add_node("assess_resources", assess_resources)
         g.add_node("write_response", write_response)
 
         # --- Add edges ---
         g.add_edge(START, "create_conversation")
-        g.add_edge("create_conversation", "write_queries")
-        g.add_edge("write_queries", "query_vector_db")
-        g.add_edge("query_vector_db", "assess_resources")
+        g.add_edge("create_conversation", "classify_research_needed")
+        g.add_edge("write_queries", "query_sources")
+        g.add_edge("query_sources", "assess_resources")
         g.add_edge("write_response", END)
 
         # --- Add conditional edges ---
         g.add_conditional_edges(
             "assess_resources",
             lambda state: "write_response" if state["query_satisfied"] else "write_queries"
+        )
+        g.add_conditional_edges(
+            "classify_research_needed",
+            lambda state: "write_queries" if state["research_needed"] else "write_response"
         )
 
         self.graph = g.compile()

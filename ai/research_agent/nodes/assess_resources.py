@@ -8,20 +8,19 @@ from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 
 
 # Max queries allowed
-MAX_SOURCES = 10
+MAX_SOURCES = 4
 
 def get_feedback(last_message, resources):
     """Get feedback on why the current research resources are insufficient to answer the user's query."""
 
     # Get configured feedback model
-    feedback_model = MODEL_CONFIG["assess_resources_feedback"]
+    feedback_model, feedback_reasoning = MODEL_CONFIG["assess_resources_feedback"]
 
     # Build feedback prompt (system and user message)
     feedback_system_msg = SystemMessage(content=(
-        "You are an assistant that provides feedback on why the current research resources might be insufficient to answer "
-        "the user's query. Provide specific guidelines for further queries, not criticisms of current results, "
-        "summaries, etc.\n\n"
-        "Limit your response to 400-500 tokens total text extracted per response.\n"
+        "You are an assistant that provides feedback on why the current research resources are insufficient to answer "
+        "the user's query. Provide specific guidelines for further queries, not criticisms of current results. Limit "
+        "your response to 100-200 tokens, in other words, be concise.\n"
     ))
 
     feedback_user_msg = HumanMessage(content=(
@@ -31,7 +30,7 @@ def get_feedback(last_message, resources):
     ))
 
     # Invoke feedback model and extract output
-    feedback_result = feedback_model.invoke([feedback_system_msg, feedback_user_msg], reasoning={"effort": "minimal"})
+    feedback_result = feedback_model.invoke([feedback_system_msg, feedback_user_msg], reasoning={"effort": feedback_reasoning})
     feedback = gpt_extract_content(feedback_result)
 
     return feedback
@@ -48,18 +47,19 @@ def assess_resources(state: ResearchAgentState):
     resources = state.get("resources") or "No research resources collected yet."
 
     # Get configured model
-    classifier_model = MODEL_CONFIG["assess_resources_classifier"]
+    classifier_model, classifier_reasoning = MODEL_CONFIG["assess_resources_classifier"]
 
     # Build prompt (system and user message)
     system_msg = SystemMessage(content=(
         "You are a classifier assistant that classified the research as either sufficient or insufficient to answer "
         "the user's query. Some things to consider:\n"
-        "- Does the research cover the main concepts and arguments implied by the user's query?\n"
-        "- If the user named specific authors or sources, they ALL MUST BE included in the resources, not just mentioned in them.\n"
-        "- Most questions tend to require between 3-5 sources to be adequately answered. Only when necessary should you "
-        "consider the research insufficient with more than 5 sources.\n\n"
+        "- Does the research cover the main concept(s) and argument(s) implied by the user's query?\n"
+        "- If the user named specific authors or sources, they ALL MUST BE included in the resources.\n"
+        "- Most of the time, one resource is sufficient, but sometimes multiple are needed for complex queries.\n"
+        "- Are the resources too specific or too general to address the user's question? Are they focusing on an "
+        "irrelevant or unimportant aspect of the question? Are they covering all aspects of the answer?\n\n"
         "Respond with NOTHING BUT a single word: 'YES' if the research is sufficient to answer the user's query, "
-        "or 'NO' if it is not sufficient.\n"
+        "or 'NO' if it is not sufficient."
     ))
 
     last_message = conversation.get("last_user_message", "No last user message found")
@@ -69,8 +69,8 @@ def assess_resources(state: ResearchAgentState):
     ))
 
     # Invoke model and extract output
-    result = classifier_model.invoke([system_msg, user_msg], reasoning={"effort": "low"})
-    query_satisfied = gpt_extract_content(result).strip().lower() == "yes"  # yes = True, otherwise False
+    result = classifier_model.invoke([system_msg, user_msg], reasoning={"effort": classifier_reasoning})
+    query_satisfied = "yes" in gpt_extract_content(result).strip().lower()  # yes = True, otherwise False
 
     # If not satisfied, get feedback on what additional research is needed
     if not query_satisfied:

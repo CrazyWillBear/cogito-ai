@@ -16,7 +16,7 @@ class Postgres:
         load_dotenv()
 
         host = os.getenv("COGITO_POSTGRES_HOST")
-        port = int(os.getenv("COGITO_POSTGRES_PORT", "5432"))
+        port = int(os.getenv("COGITO_POSTGRES_PORT"))
         dbname = os.getenv("COGITO_POSTGRES_DBNAME")
         user = os.getenv("COGITO_POSTGRES_USER")
         password = os.getenv("COGITO_POSTGRES_PASSWORD")
@@ -60,7 +60,7 @@ class Postgres:
         # Listen for notifications indefinitely
         try:
             while True:
-                # Wait for notifications (uses the connection's fileno)
+                # Wait for notifications (uses the connection's file no)
                 if select.select([listen_conn], [], [], 1) == ([], [], []):
                     continue
 
@@ -77,7 +77,7 @@ class Postgres:
         """Update the dict of authors to sources from the database."""
 
         cur = self.conn.cursor()
-        cur.execute(f"SELECT authors, sources FROM {self.filters_table};")
+        cur.execute(f"SELECT author, source FROM {self.filters_table};")
         rows = cur.fetchall()
 
         # Build mapping with de-duplication

@@ -24,7 +24,7 @@ class Qdrant:
         self.collection = os.getenv("COGITO_QDRANT_COLLECTION")
 
         # --- Initialize database clients ---
-        self.client = QdrantClient(url=url, grpc_port=port, api_key=api_key, prefer_grpc=True, https=False)
+        self.client = QdrantClient(url=url, grpc_port=port, prefer_grpc=True, https=False)#, api_key=api_key)
         self.postgres_client = Postgres()
         self.embedder = Embedder()
 
@@ -79,7 +79,7 @@ class Qdrant:
                     if best_source:
                         conditions.append(
                             FieldCondition(
-                                key="source_title",
+                                key="title",
                                 match=MatchValue(value=best_source[0])
                             )
                         )
@@ -91,7 +91,7 @@ class Qdrant:
             search_requests.append(
                 models.QueryRequest(
                     query=vector,
-                    limit=2,
+                    limit=1,
                     filter=filter_obj,
                     with_payload=True,
                     with_vector=False
