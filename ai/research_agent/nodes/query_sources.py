@@ -10,7 +10,7 @@ from ai.research_agent.nodes.sources.sep import query_sep
 from ai.research_agent.nodes.sources.vector_db import query_vector_db
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from dbs.Qdrant import Qdrant
-from dbs.query import QueryAndFilters
+from dbs.QueryAndFilterSchemas import QueryAndFilters
 
 
 def query_sources(state: ResearchAgentState, qdrant: Qdrant):

@@ -6,7 +6,7 @@ from qdrant_client.http.models import MatchValue, FieldCondition, Filter
 from rapidfuzz import process
 
 from dbs.Postgres import Postgres
-from dbs.query import QueryAndFilters
+from dbs.QueryAndFilterSchemas import QueryAndFilters
 from embed.Embedder import Embedder
 
 

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from ai.models.model_config import MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
-from dbs.query import QueryAndFilters
+from dbs.QueryAndFilterSchemas import QueryAndFilters
 
 
 class QueryList(BaseModel):

@@ -1,5 +1,5 @@
 from dbs.Qdrant import Qdrant
-from dbs.query import QueryAndFilters
+from dbs.QueryAndFilterSchemas import QueryAndFilters
 
 
 def query_vector_db(queries: list[QueryAndFilters], last_user_msg: str, qdrant: Qdrant):
