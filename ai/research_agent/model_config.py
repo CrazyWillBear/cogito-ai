@@ -1,4 +1,4 @@
-from ai.models.groq import oss_120b, llama_8b_instant, llama_4_maverick, oss_20b
+from ai.models.groq import llama_8b_instant, llama_4_maverick, oss_20b, oss_120b_low, oss_120b_med
 
 # Model configuration for research agent (model, reasoning amount)
 RESEARCH_AGENT_MODEL_CONFIG = {
@@ -6,5 +6,6 @@ RESEARCH_AGENT_MODEL_CONFIG = {
     "research_classifier": (oss_20b, None),             # Slightly nuanced classification task
     "extract_text": (llama_8b_instant, None),           # Text extraction task
     "plan_research": (llama_4_maverick, None),          # Moderate complexity planning + structured output task
-    "write_response": (oss_120b, None)                  # Moderate complexity evidence synthesis task
+    "write_response_simple": (oss_120b_low, None),      # Moderate complexity evidence synthesis task
+    "write_response_deep": (oss_120b_med, None)         # High complexity evidence synthesis task
 }

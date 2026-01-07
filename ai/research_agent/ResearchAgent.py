@@ -9,6 +9,7 @@ from ai.research_agent.nodes.execute_queries import execute_queries
 from ai.research_agent.nodes.plan_research import plan_research
 from ai.research_agent.nodes.write_response import write_response
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
+from ai.research_agent.schemas.ResearchEffort import ResearchEffort
 from dbs.Postgres import Postgres
 from dbs.Qdrant import Qdrant
 
@@ -81,7 +82,7 @@ class ResearchAgent:
         )
         g.add_conditional_edges(
             "classify_research_needed",
-            lambda state: "plan_research" if state["research_needed"] else "write_response"
+            lambda state: "plan_research" if state["research_effort"] is not ResearchEffort.NONE else "write_response"
         )
 
         self.graph = g.compile()

@@ -98,11 +98,13 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
     # Construct prompt (system message and user message)
     system_msg = SystemMessage(
         content=(
+            "## YOUR ROLE\n"
             "You are a research query planner. Analyze the user's question and generate search queries for two sources, "
             "or stop research by returning null for all fields.\n\n"
 
-            f"**Iteration {research_iterations}**: For simple questions, keep iterations below 2. Complex questions can "
-            "continue until satisfied.\n\n"
+            f"## Iteration {research_iterations} (1-indexed):\n"
+            "For simple questions, try to finish by iteration 2-3. Other and more complex questions can continue "
+            "until satisfied.\n\n"
 
             "## SOURCES\n"
             "1. **Vector DB**: Primary source chunks from Project Gutenberg philosophy texts\n"
@@ -126,9 +128,9 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             f"- SEP-specific rules:\n\"\"\"{SEP_SEARCH_RULES}\"\"\"\n\n"
 
             "## END RESEARCH WHEN:\n"
-            "- You have 2-3 relevant sources with relevant content, OR\n"
-            "- Past queries show sources are unavailable/irrelevant, OR\n"
-            "- You have surpassed 3 iterations for a simple question (not multifaceted, can be Googled, etc.)\n\n"
+            "- For simple questions, you have 2-3 relevant results with relevant content, OR\n"
+            "- For complex questions, you have sufficient sources to address the question, OR\n"
+            "- Past queries show necessary sources are unavailable/irrelevant, OR\n\n"
             
             "## HOW TO END RESEARCH:\n"
             "Set both `stanford_encyclopedia_queries` and `vector_db_queries` to `null`\n\n"

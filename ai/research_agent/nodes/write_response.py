@@ -6,6 +6,7 @@ from langchain_core.messages import SystemMessage
 from ai.models.util import extract_content, safe_invoke
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
+from ai.research_agent.schemas.ResearchEffort import ResearchEffort
 from ai.research_agent.sources.stringify import stringify_query_results
 from util.SpinnerController import SpinnerController
 
@@ -17,12 +18,10 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
     if spinner_controller:
         spinner_controller.set_text("::Writing final response")
 
-    # Get configured model
-    model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["write_response"]
-
     # Extract graph state variables
     query_results = state.get("query_results", "No research resources collected yet.")
     conversation = state.get("conversation", [])
+    research_effort = state.get("research_effort", None)
 
     # Construct prompt (system message and user message)
     system_msg = SystemMessage(content=(
@@ -89,8 +88,13 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
         "CRITICAL INSTRUCTION TO FOLLOW. NEVER FABRICATE INFORMATION OR REFERENCE SOURCES YOU DON'T HAVE.\n"
     ))
 
-    # Invoke LLM and extract output
-    result = safe_invoke(model, [*conversation, system_msg], reasoning)
+    # Invoke LLM depending on complexity and extract output
+    if research_effort is ResearchEffort.DEEP:
+        model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["write_response_deep"]
+        result = safe_invoke(model, [*conversation, system_msg], reasoning)
+    else:
+        model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["write_response_simple"]
+        result = safe_invoke(model, [*conversation, system_msg], reasoning)
     text = extract_content(result)
 
     return {"response": text}

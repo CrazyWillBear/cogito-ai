@@ -3,7 +3,14 @@ from langchain_groq import ChatGroq
 
 load_dotenv()  # needed for langchain_groq to find GROQ_API_KEY in environment
 
-oss_120b = ChatGroq(
+oss_120b_low = ChatGroq(
+    model="openai/gpt-oss-120b",
+    temperature=0.2,
+    reasoning_effort="low",
+    reasoning_format="parsed"
+)
+
+oss_120b_med = ChatGroq(
     model="openai/gpt-oss-120b",
     temperature=0.2,
     reasoning_effort="medium",

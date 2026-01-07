@@ -6,6 +6,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from ai.models.util import extract_content, safe_invoke
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
+from ai.research_agent.schemas.ResearchEffort import ResearchEffort
 from util.SpinnerController import SpinnerController
 
 
@@ -42,7 +43,7 @@ def create_conversation(state: ResearchAgentState, spinner_controller: SpinnerCo
     state.setdefault('sep_queries', [])
     state.setdefault('research_iterations', 1)
     state.setdefault('completed', False)
-    state.setdefault('research_needed', True)
+    state.setdefault('research_effort', ResearchEffort.NONE)
     state.setdefault('query_results', [])
     state.setdefault('all_raw_results', set())
 
@@ -52,7 +53,7 @@ def create_conversation(state: ResearchAgentState, spinner_controller: SpinnerCo
         'vector_db_queries': state['vector_db_queries'],
         'sep_queries': state['sep_queries'],
         'completed': state['completed'],
-        'research_needed': state['research_needed'],
+        'research_effort': state['research_effort'],
         'query_results': state['query_results'],
         'all_raw_results': state['all_raw_results']
     }
