@@ -8,6 +8,16 @@ An Q&A-style AI agent for philosophy research that searches various sources to g
 
 Cogito AI is an AI research assistant designed to help users explore philosophical questions by searching authoritative sources like the Stanford Encyclopedia of Philosophy and a curated set of Project Gutenberg texts. It leverages LLMs to generate context-aware queries, retrieve relevant sources, and synthesize well-supported answers with full citations.
 
+## Realtime Demo
+
+### Comparing philosophers' ideas
+
+<img src="https://mirrors.williamchastain.com/images/Cogito%20CLI%20Demo.gif" alt="Cogito Demo Gif" width="600"/>
+
+### Defining philosophical concept
+
+<img src="https://mirrors.williamchastain.com/images/Cogito%20CLI%20Demo%202.gif" alt="Cogito Demo Gif 2" width="600"/>
+
 ## Features
 
 - Search across the Stanford Encyclopedia of Philosophy
