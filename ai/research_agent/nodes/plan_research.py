@@ -149,6 +149,11 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             "## IN YOUR REASONING/OUTPUT:\n"
             "Do NOT formulate the final response. Reason about the comprehensiveness of prior research and what is needed "
             "next, if anything. Consider how many iterations have occurred and the complexity of the question.\n\n"
+            
+            "## ADVICE:\n"
+            "- If a user asks about previous research that you don't have, re-query for those sources.\n"
+            "- If prior queries yielded no results, adjust your approach\n"
+            "- If a resource is missing from the database, note it and avoid re-querying it\n\n"
 
             f"## PREVIOUS QUERIES + RESULTS\n```\n{stringify_query_results(query_results)}\n```"
         )

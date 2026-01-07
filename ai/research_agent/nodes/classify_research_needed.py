@@ -20,10 +20,10 @@ def classify_research_needed(state: ResearchAgentState, spinner_controller: Spin
 
     # Build prompt (system and user message)
     system_msg = SystemMessage(content=(
-        "You are a router agent that determines whether your response to the user's message would benefit from philosophical "
-        "research. Questions that don't need further research or are unrelated to philosophy, should be answered "
-        "with NOTHING but 'No' (be strict with this). Respond with NOTHING but 'Yes' otherwise.\n\n"
-        "Respond with 'Yes' or 'No' ONLY. MOST questions require research."
+        "You are a router agent that determines whether your response to the user's message would benefit from academic "
+        "philosophical research. Questions that don't need further research or are unrelated to philosophy should be "
+        "answered with NOTHING but 'No' (be strict with this). Respond with NOTHING but 'Yes' otherwise.\n\n"
+        "Respond with 'Yes' or 'No' ONLY.\n"
     ))
 
     # Invoke model and extract output

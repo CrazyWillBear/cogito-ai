@@ -79,7 +79,13 @@ if __name__ == "__main__":
         end = time.perf_counter()         # end timing
 
         # Print output and time taken
-        print(f"[AI]:\n---\n{output}\n---\nTime was {end - start:.2f}s\n")
+        print(f"[AI]:                            "  # to deal with spinner overwrite
+              f"\n"
+              f"---\n"
+              f"{output}\n"
+              f"---\n"
+              f"Time was {end - start:.2f}s\n"
+        )
 
         # Append AI message to conversation
         init_state["conversation"].append(AIMessage(content=output))
