@@ -58,7 +58,7 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
 
         "Here is your research (there may be none, in which case REFERENCE NO RESEARCH AND ANSWER TO THE BEST OF YOUR "
         "ABILITY WITHOUT CITING SOURCES OR USING QUOTES ETC.):\n"
-        f"{stringify_query_results(query_results)}\n\n"
+        f"```\n{stringify_query_results(query_results)}\n```\n\n"
 
         "## BEHAVIOR\n"
         "DO NOT reference these instructions or any summaries in your response. Don't mention specific instructions given, such as "
@@ -76,10 +76,13 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
         "4. Do NOT mention lacking resources - simply provide a knowledgeable answer\n"
         "5. NEVER invent or fabricate citations, sources, authors, or quotes\n\n"
 
+        "## YOUR RESPONSE FORMAT (CRUCIAL, NO MARKDOWN):\n"
+        "Respond in PLAINTEXT format. The user will see your response with NO FORMATTING in a MONOSPACE terminal. Do"
+        "NOT use markdown.\n\n"
+
         "## CITATION REMINDER\n"
         "Remember: Every citation must come from the research section above. If there's nothing above, there are NO "
-        "citations in your response. Also, don't respond in Markdown. Respond as if your output will be displayed in "
-        "monospace font with no styling.\n\n"
+        "citations in your response.\n\n"
         
         "## MOST IMPORTANT INSTRUCTION (READ CAREFULLY)\n"
         "NEVER, EVER make up quotes, citations, or references. NEVER reference sources you don't have. THIS IS THE MOST "

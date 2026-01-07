@@ -19,5 +19,10 @@ oss_20b = ChatGroq(
 
 llama_8b_instant = ChatGroq(
     model="llama-3.1-8b-instant",
-    temperature=0.2
+    temperature=0.1
+)
+
+llama_4_maverick = ChatGroq(
+    model="meta-llama/llama-4-maverick-17b-128e-instruct",
+    temperature=0.1
 )
