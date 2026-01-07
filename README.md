@@ -12,9 +12,9 @@ Cogito AI is an AI research assistant designed to help users explore philosophic
 
 - Search across the Stanford Encyclopedia of Philosophy
 - Semantic search across 1000+ select Project Gutenberg philosophy sources
-- Conversation-aware query generation with author/source filtering
+- Conversation-aware query generation with source + author filtering
 - Parallel resource retrieval and text-extraction
-- Iterative research with resource sufficiency assessment
+- Planning and iterative research with chain-of-thought reasoning
 - Citation-backed responses with quoted evidence
 
 ## Prerequisites
@@ -22,7 +22,7 @@ Cogito AI is an AI research assistant designed to help users explore philosophic
 - Python 3.10+
 - Linux / macOS / WSL (not Windows)
 - Docker
-- OpenAI API key or local LLM setup (configuration required for local LLMs)
+- Groq API key (or OpenAI API key / local setup for custom configuration, see below)
 
 ## Quick Start
 
@@ -114,7 +114,13 @@ python main_server.py
 
 ## Configuration
 
+It's recommended to leave LLM configuration as-is for best results (current models are optimized for speed, cost, and
+accuracy.) If you wish to customize, here are the main areas:
+
 - **LLM configuration**: See `ai/models/model_config.py`
+  - Create LangChain `ChatModel` instances with different models, temperature, max tokens, etc. (ideally in something
+like `ai/models/<your_model>.py`)
+  - You can set reasoning levels for newer OpenAI and Anthropic models.
 - **Database connections**: Configured via `.env` file
 
 ## License
