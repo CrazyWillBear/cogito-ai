@@ -1,11 +1,13 @@
+import json
 import time
 from datetime import datetime
 from pathlib import Path
 
+from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, messages_to_dict
 
 from ai.research_agent.ResearchAgent import ResearchAgent
-
+from util.SpinnerController import SpinnerController
 
 START_TEXT = \
 r"""
@@ -42,9 +44,9 @@ def write_logs(logs: str):
     """Helper function to write logs to console."""
 
 
-    p = Path(f"logs/agent_logs{datetime.now()}.txt")
+    p = Path(f"logs/agent_logs_recent.txt")
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(logs)
+    p.write_text(logs, encoding="utf-8")
 
 if __name__ == "__main__":
     # Main entry point for running the Cogito AI research assistant in a console loop.
@@ -52,14 +54,13 @@ if __name__ == "__main__":
     print(START_TEXT)
 
     # Conversation setup
-    conversation = {
-        "messages": [
-            SystemMessage(content="You are a helpful philosophical research assistant.")
-        ]
+    init_state = {
+        "conversation": []
     }
 
     # Build agent
-    agent = ResearchAgent()
+    spinner_controller = SpinnerController()
+    agent = ResearchAgent(spinner_controller=spinner_controller)
     agent.build()
 
     # Main loop
@@ -68,22 +69,23 @@ if __name__ == "__main__":
         user_input = input("[User]: ")
         if user_input.lower() in {"exit", "quit"}:
             break
-        conversation["messages"].append(HumanMessage(content=user_input))
+        init_state["conversation"].append(HumanMessage(content=user_input))
         print()
 
         # Run agent with timing
-        start = time.perf_counter()         # start timing
-        output = agent.run(conversation)    # invoke/run agent
-        end = time.perf_counter()           # end timing
+        start = time.perf_counter()       # start timing
+        output = agent.run(init_state)    # invoke/run agent
+        spinner_controller.stop_spinner() # stop spinner
+        end = time.perf_counter()         # end timing
 
         # Print output and time taken
-        print(f"\n[AI]:\n---\n{output}\n---\nTime was {end - start:.2f}s\n")
+        print(f"[AI]:\n---\n{output}\n---\nTime was {end - start:.2f}s\n")
 
         # Append AI message to conversation
-        conversation["messages"].append(AIMessage(content=output))
+        init_state["conversation"].append(AIMessage(content=output))
 
     # Close agent resources
     agent.close()
 
     # Print final conversation as dict
-    write_logs(str(messages_to_dict(conversation.get("messages", []))))
+    write_logs(json.dumps(messages_to_dict(init_state.get("conversation", [])), indent=4))

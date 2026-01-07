@@ -3,7 +3,6 @@ import threading
 
 import psycopg2
 import select
-from dotenv import load_dotenv
 
 
 class Postgres:
@@ -12,8 +11,6 @@ class Postgres:
     # --- Methods ---
     def __init__(self):
         """Initialize the PostgreSQL connection and set up real-time updates."""
-
-        load_dotenv()
 
         host = os.getenv("COGITO_POSTGRES_HOST")
         port = int(os.getenv("COGITO_POSTGRES_PORT"))
