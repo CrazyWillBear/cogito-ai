@@ -17,6 +17,8 @@ def extract_content(result):
     return str(result).strip()
 
 def safe_invoke(model, messages, reasoning_effort):
+    """Invoke a model with optional reasoning parameters, handling models that may not support reasoning."""
+
     kwargs = {}
 
     # Only pass reasoning if the model supports it

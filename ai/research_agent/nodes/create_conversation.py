@@ -3,7 +3,7 @@ import time
 import tiktoken
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from ai.models.extract_content import extract_content, safe_invoke
+from ai.models.util import extract_content, safe_invoke
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from util.SpinnerController import SpinnerController

@@ -2,7 +2,7 @@ from dbs.Qdrant import Qdrant
 from dbs.QueryAndFilterSchemas import QueryAndFilters
 
 
-def query_vector_db(queries: list[QueryAndFilters], last_user_msg: str, qdrant: Qdrant):
+def query_vector_db(queries: list[QueryAndFilters], qdrant: Qdrant):
     """Query the vector db and extract text in parallel."""
 
 

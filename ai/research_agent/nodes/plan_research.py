@@ -1,25 +1,16 @@
 from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import JsonOutputParser
-from pydantic import BaseModel
 
-from ai.models.extract_content import safe_invoke, extract_content
+from ai.models.util import safe_invoke, extract_content
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from ai.research_agent.sources.stringify import stringify_query_results
-from dbs.QueryAndFilterSchemas import QueryAndFilters
 from util.SpinnerController import SpinnerController
 
 
-class QueryList(BaseModel):
-    """Output schema for LLM query generation."""
-
-    vector_db_queries: list[QueryAndFilters] | None
-    stanford_encyclopedia_queries: list[str] | None
-
-
+# --- Define constants ---
 MAX_ITERATIONS = 5
 
-# Sample response to fit schema
 SAMPLE_RESPONSE = \
 """
 # Standard query (don't put ANY comments in your response)
@@ -83,10 +74,6 @@ SEP_SEARCH_RULES = \
 - Rules can be combined
   Example: `+semantics +logic -title:logic*`
 """
-
-# Shared tokenizer and structured model for reuse
-MODEL, DEFAULT_REASONING = RESEARCH_AGENT_MODEL_CONFIG["plan_research"]
-PARSER = JsonOutputParser()
 
 
 def plan_research(state: ResearchAgentState, spinner_controller: SpinnerController = None):
@@ -160,6 +147,8 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
     )
 
     # Invoke LLM with structured output and retry parsing on invalid JSON
+    model, reasoning_effort = RESEARCH_AGENT_MODEL_CONFIG.get("plan_research")
+    parser = JsonOutputParser()
     max_parse_attempts = 3
     attempt = 0
     result = None
@@ -170,9 +159,9 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             if spinner_controller:
                 spinner_controller.set_text(f"::Planning next step")
 
-            llm_output = safe_invoke(MODEL, [*conversation, system_msg], DEFAULT_REASONING)
+            llm_output = safe_invoke(model, [*conversation, system_msg], reasoning_effort)
             content = extract_content(llm_output)
-            result = PARSER.parse(content)
+            result = parser.parse(content)
             break
         except Exception as e:
             attempt += 1
@@ -185,6 +174,7 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             spinner_controller.set_text("::Planning failed due to invalid JSON; ending research")
         return {"completed": True}
 
+    # Check for research completion
     if not result.get("vector_db_queries") and not result.get("stanford_encyclopedia_queries"):
         return {"completed": True}
 

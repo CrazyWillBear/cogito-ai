@@ -22,12 +22,14 @@ def execute_queries(state: ResearchAgentState, qdrant: Qdrant, spinner_controlle
 
     # Query vector db and add to resources
     if vector_db_queries:
-        vector_query_results = query_vector_db(vector_db_queries, user_query, qdrant)
+        vector_query_results = query_vector_db(vector_db_queries, qdrant)
         for result in vector_query_results:
             raw_result = result.get("result", None)
             if raw_result not in all_results:
                 query_results.append(result)
                 all_results.add(raw_result)
+
+    # Query SEP and add to resources
     if sep_queries:
         sep_query_results = query_sep(sep_queries, user_query)
         for result in sep_query_results:
