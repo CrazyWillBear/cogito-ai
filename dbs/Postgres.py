@@ -18,7 +18,6 @@ class Postgres:
         user = os.getenv("COGITO_POSTGRES_USER")
         password = os.getenv("COGITO_POSTGRES_PASSWORD")
 
-
         self.conversations_table = "conversations"
         self.filters_table = "filters"
 

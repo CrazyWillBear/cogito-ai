@@ -26,11 +26,11 @@ class ResearchAgent:
         self.postgres_filters = postgres_filters if postgres_filters is not None else Postgres()
         self.spinner_controller = spinner_controller
 
-    def run(self, conversation: dict) -> str:
+    def run(self, conversation: dict) -> ResearchAgentState:
         """Invoke the Research Agent subgraph with a conversation."""
 
         res = self.graph.invoke(conversation)
-        return res.get('response', 'No response available')
+        return res
 
     def build(self) -> None:
         """

@@ -89,7 +89,7 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
     ))
 
     # Invoke LLM depending on complexity and extract output
-    if research_effort is ResearchEffort.DEEP:
+    if research_effort == ResearchEffort.DEEP:
         model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["write_response_deep"]
         result = safe_invoke(model, [*conversation, system_msg], reasoning)
     else:

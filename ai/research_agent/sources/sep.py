@@ -145,7 +145,7 @@ Section Headers:
 
 Please respond with ONLY a JSON array of section identifiers (as strings) that are relevant. 
 For example: ["1", "2.1", "3.4"]
-If the user's query isn't a query and refers to a message that you can't see, try to identify sections that are most relevant to the article itself.
+If the user's query isn't a query or refers to a message that you can't see or is otherwise irrelevant or unclear, try to identify sections that are most relevant to the article itself.
 If no sections are relevant, return an empty array: []
 
 Response:"""

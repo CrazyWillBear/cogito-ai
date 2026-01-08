@@ -54,9 +54,7 @@ if __name__ == "__main__":
     print(START_TEXT)
 
     # Conversation setup
-    init_state = {
-        "conversation": []
-    }
+    conversation = []
 
     # Build agent
     spinner_controller = SpinnerController()
@@ -69,12 +67,14 @@ if __name__ == "__main__":
         user_input = input("[User]: ")
         if user_input.lower() in {"exit", "quit"}:
             break
-        init_state["conversation"].append(HumanMessage(content=user_input))
+        conversation.append(HumanMessage(content=user_input))
         print()
 
         # Run agent with timing
         start = time.perf_counter()       # start timing
-        output = agent.run(init_state)    # invoke/run agent
+        output = agent.run({"conversation": conversation})    # invoke/run agent
+        txt_out = output.get('response', 'No response available')
+        effort = output.get('research_effort', 'Unknown')
         spinner_controller.stop_spinner() # stop spinner
         end = time.perf_counter()         # end timing
 
@@ -82,16 +82,16 @@ if __name__ == "__main__":
         print(f"[AI]:                            "  # to deal with spinner overwrite
               f"\n"
               f"---\n"
-              f"{output}\n"
+              f"{txt_out}\n"
               f"---\n"
-              f"Time was {end - start:.2f}s\n"
+              f"Time was {end - start:.2f}s - Research level {effort}\n"
         )
 
         # Append AI message to conversation
-        init_state["conversation"].append(AIMessage(content=output))
+        conversation.append(AIMessage(content=txt_out))
 
     # Close agent resources
     agent.close()
 
     # Print final conversation as dict
-    write_logs(json.dumps(messages_to_dict(init_state.get("conversation", [])), indent=4))
+    write_logs(json.dumps(messages_to_dict(conversation), indent=4))

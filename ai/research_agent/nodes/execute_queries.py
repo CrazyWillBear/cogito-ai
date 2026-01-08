@@ -3,6 +3,7 @@ from ai.research_agent.sources.vector_db import query_vector_db
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from dbs.Qdrant import Qdrant
 from util.SpinnerController import SpinnerController
+from concurrent.futures import ThreadPoolExecutor
 
 
 def execute_queries(state: ResearchAgentState, qdrant: Qdrant, spinner_controller: SpinnerController = None):
@@ -20,22 +21,23 @@ def execute_queries(state: ResearchAgentState, qdrant: Qdrant, spinner_controlle
     query_results = state.get("query_results", [])
     all_results = state.get("all_raw_results", set())
 
-    # Query vector db and add to resources
-    if vector_db_queries:
-        vector_query_results = query_vector_db(vector_db_queries, qdrant)
-        for result in vector_query_results:
-            raw_result = result.get("result", None)
-            if raw_result not in all_results:
-                query_results.append(result)
-                all_results.add(raw_result)
+    # Run vector DB and SEP queries concurrently (only if present)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        futures = []
+        if vector_db_queries:
+            futures.append(executor.submit(query_vector_db, vector_db_queries, qdrant))
+        if sep_queries:
+            futures.append(executor.submit(query_sep, sep_queries, user_query))
 
-    # Query SEP and add to resources
-    if sep_queries:
-        sep_query_results = query_sep(sep_queries, user_query)
-        for result in sep_query_results:
-            raw_result = result.get("result", None)
-            if raw_result not in all_results:
-                query_results.append(result)
-                all_results.add(raw_result)
+        for future in futures:
+            try:
+                results = future.result() or []
+            except Exception:
+                results = []
+            for result in results:
+                raw_result = result.get("result", None)
+                if raw_result not in all_results:
+                    query_results.append(result)
+                    all_results.add(raw_result)
 
     return {"query_results": query_results, "all_raw_results": all_results}

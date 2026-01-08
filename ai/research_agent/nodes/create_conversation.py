@@ -19,23 +19,24 @@ def create_conversation(state: ResearchAgentState, spinner_controller: SpinnerCo
     # Extract graph state variables
     conversation = state.get("conversation", [])
 
-    token_limit = 6000
-    tokenizer = tiktoken.encoding_for_model("gpt-5-mini")
+    token_limit = 10000
+    tokenizer = tiktoken.get_encoding("cl100k_base")
     tokens = len(tokenizer.encode(str([msg.content for msg in conversation])))
     if tokens > token_limit:
         model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["create_conversation_summary"]
 
         # Build prompt (system and user message)
         system_msg = HumanMessage(content=(
+            "## YOUR ROLE\n"
             "You are a conversation summarizer. Your job is to summarize the conversation between the user and the AI "
-            "assistant up until and excluding this message, focusing on the key points discussed, questions asked, and "
-            "any relevant context that would help.\n\n"
-            "Your summary should at most half the length of the original conversation."
+            "assistant up until and excluding this message, focusing on the key points addressed, questions asked, and "
+            "any relevant context that would help. Note philosophers, sources, and concepts discussed.\n\n"
+            "Your summary should at most half the length of the original conversation.\n"
         ))
 
         # Invoke model and extract content
-        result = safe_invoke(model, [system_msg], reasoning)
-        conversation = [SystemMessage(content=f"Previous messages summary: {extract_content(result)}")]
+        result = safe_invoke(model, [*conversation[:-1], system_msg], reasoning)
+        conversation = [SystemMessage(content=f"## CONVERSATION SUMMARY BEFORE THIS POINT\n{extract_content(result)}"), conversation[-1]]
 
     # Initialize remaining required keys in state
     state.setdefault('response', '')

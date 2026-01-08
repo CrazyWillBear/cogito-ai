@@ -67,8 +67,8 @@ class Qdrant:
                             r = {
                                 "query": q,
                                 "source": "Project Gutenberg Vector DB",
-                                "result": f"{f.get('author')} not found in author list. This author is not in the database. "
-                                          f"Closest match: {selected_author}."
+                                "result": f"'{f.get('author')}' not found in author list. This author is not in the database. "
+                                          f"Closest match: '{selected_author}'."
                             }
                             results_out.append(r)
                             continue  # skip this query if author match is too low
@@ -96,10 +96,9 @@ class Qdrant:
                             r = {
                                 "query": q,
                                 "source": "Project Gutenberg Vector DB",
-                                "result": f"{f.get('source_title')} not found in source list. This source is either not "
-                                          f"written by the author '{selected_author}' or is not in the database. "
-                                          f"Maybe try the original language title or a different title? Best "
-                                          f"match: {selected_source}."
+                                "result": f"'{f.get('source_title')}' not found in source list. This source is either not "
+                                          f"written by the author '{selected_author}' or is not in the database. Best "
+                                          f"match: '{selected_source}'."
                             }
                             results_out.append(r)
                             continue

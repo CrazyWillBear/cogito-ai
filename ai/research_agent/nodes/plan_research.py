@@ -4,12 +4,14 @@ from langchain_core.output_parsers import JsonOutputParser
 from ai.models.util import safe_invoke, extract_content
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
+from ai.research_agent.schemas.ResearchEffort import ResearchEffort
 from ai.research_agent.sources.stringify import stringify_query_results
 from util.SpinnerController import SpinnerController
 
 
 # --- Define constants ---
-MAX_ITERATIONS = 5
+MAX_ITERATIONS_DEEP = 10
+MAX_ITERATIONS_SIMPLE = 3
 
 SAMPLE_RESPONSE = \
 """
@@ -88,9 +90,12 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
     conversation = state.get("conversation", [])
     query_results = state.get("query_results", [])
     research_iterations = state.get("research_iterations", 1)
+    research_effort = state.get("research_effort", None)
+
+    max_iterations = MAX_ITERATIONS_DEEP if research_effort == ResearchEffort.DEEP else MAX_ITERATIONS_SIMPLE
 
     # Hard stop to avoid infinite loops in the graph
-    if research_iterations >= MAX_ITERATIONS:
+    if research_iterations > max_iterations:
         if spinner_controller:
             spinner_controller.set_text("::Reached max research iterations; finalizing")
         return {"completed": True}
@@ -102,9 +107,9 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             "You are a research query planner. Analyze the user's question and generate search queries for two sources, "
             "or stop research by returning null for all fields.\n\n"
 
-            f"## Iteration {research_iterations} (1-indexed):\n"
-            "For simple questions, try to finish by iteration 2-3. Other and more complex questions can continue "
-            "until satisfied.\n\n"
+            f"## ITERATION {research_iterations} (1-indexed):\n"
+            f"For this task, your hard limit is {max_iterations}, which will be your final iteration. If you finish "
+            f"early, that's more than fine and in fact is encouraged.\n\n"
 
             "## SOURCES\n"
             "1. **Vector DB**: Primary source chunks from Project Gutenberg philosophy texts\n"
@@ -112,7 +117,7 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
 
             "## OUTPUT FORMAT (CRITICAL)\n"
             "Respond ONLY with the following JSON structure, no other text. It uses `#` comments which don't exist in "
-            "real JSON, so don't add any comments of your own.\n"
+            "real JSON, so don't add any comments of your own. DO NOT USE TOOLS!!!\n"
             f"```json{SAMPLE_RESPONSE}```\n\n"
 
             "## SOURCE SELECTION\n"
@@ -121,16 +126,18 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             "**Both**: Idea genealogy, comparing sources with concepts, evidence + interpretation\n\n"
 
             "## QUERY RULES\n"
-            "- MAX 2 queries per source\n"
+            "- MAX 5 queries for Project Gutenberg Vector DB (for this iteration, not total)\n"
+            "- Max 2 queries for SEP (for this iteration, not total)\n"
+            "- MIN 1 completed query total across all sources\n"
             "- NEVER repeat past queries\n"
             "- Vector DB: One concept per query, broad enough for large chunks, author names in 'filters' only, semantic search works\n"
             "- SEP: Concise encyclopedia terms, usually 1 query unless genuinely distinct facets\n"
             f"- SEP-specific rules:\n\"\"\"{SEP_SEARCH_RULES}\"\"\"\n\n"
 
             "## END RESEARCH WHEN:\n"
-            "- For simple questions, you have 2-3 relevant results with relevant content, OR\n"
-            "- For complex questions, you have sufficient sources to address the question, OR\n"
-            "- Past queries show necessary sources are unavailable/irrelevant, OR\n\n"
+            "- You have 1-2 relevant results with relevant content (simple questions)\n"
+            "- You have sufficient research (>=3 relevant results) to answer the question (medium-to-complex questions)\n"
+            "- Past queries show necessary sources are unavailable/irrelevant\n\n"
             
             "## HOW TO END RESEARCH:\n"
             "Set both `stanford_encyclopedia_queries` and `vector_db_queries` to `null`\n\n"
