@@ -1,5 +1,7 @@
 from concurrent.futures import ProcessPoolExecutor
 
+from langchain_core.messages import AnyMessage, messages_from_dict
+
 from ai.research_agent.ResearchAgent import ResearchAgent
 from cogito_servicer import cogito_pb2_grpc
 from dbs.Postgres import Postgres
@@ -8,10 +10,15 @@ from dbs.Postgres import Postgres
 process_pool = ProcessPoolExecutor(max_workers=4)
 
 
-def _run_agent_task(agent: ResearchAgent, conversation: dict) -> str:
+def _run_agent_task(agent: ResearchAgent, conversation: list[AnyMessage]) -> str:
     """Helper function to run the agent task in a separate process."""
 
     return agent.run(conversation)
+
+def _convert_conversation(conversation: list[dict]) -> list[AnyMessage]:
+    """Convert a conversation from dict format to AnyMessage format."""
+
+    return messages_from_dict(conversation)
 
 
 class CogitoServer(cogito_pb2_grpc.CogitoServicer):
@@ -29,7 +36,6 @@ class CogitoServer(cogito_pb2_grpc.CogitoServicer):
         # Extract parameters from the request
         user_id = request.user_id
         conversation_id = request.conversation_id
-        agent_name = request.agent  # Currently unused, reserved for future use
 
         # Retrieve the conversation from the Postgres database
         conversation = self.postgres_db.get_conversation(user_id, conversation_id)

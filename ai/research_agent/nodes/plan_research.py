@@ -130,9 +130,9 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             "- Max 2 queries for SEP (for this iteration, not total)\n"
             "- MIN 1 completed query total across all sources\n"
             "- NEVER repeat past queries\n"
-            "- Vector DB: One concept per query, broad enough for large chunks, author names in 'filters' only, semantic search works\n"
-            "- SEP: Concise encyclopedia terms, usually 1 query unless genuinely distinct facets\n"
-            f"- SEP-specific rules:\n\"\"\"{SEP_SEARCH_RULES}\"\"\"\n\n"
+            "- Vector DB: Contains both large and medium sized chunks, can be broad or specific. Can be searched both "
+            "semantically and normally.\n"
+            f"- SEP:\n\"\"\"{SEP_SEARCH_RULES}\"\"\"\n\n"
 
             "## END RESEARCH WHEN:\n"
             "- You have 1-2 relevant results with relevant content (simple questions)\n"
