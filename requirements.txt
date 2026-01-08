@@ -10,7 +10,7 @@ protobuf
 psycopg2_binary
 pydantic
 python-dotenv
-qdrant_client1.16.2
+qdrant_client
 rapidfuzz
 tiktoken
 typing_extensions
