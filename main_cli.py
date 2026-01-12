@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
         # Run agent with timing
         start = time.perf_counter()       # start timing
-        output = agent.run({"conversation": conversation})    # invoke/run agent
+        output = agent.run(conversation)  # invoke/run agent
         txt_out = output.get('response', 'No response available')
         effort = output.get('research_effort', 'Unknown')
         spinner_controller.stop_spinner() # stop spinner

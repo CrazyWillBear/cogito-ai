@@ -1,3 +1,4 @@
+import json
 import os
 import threading
 
@@ -103,6 +104,19 @@ class Postgres:
             if row is None:
                 return None
             return row[0]
+        finally:
+            cur.close()
+
+    def update_conversation(self, user_id: str, conversation_id: str, messages: list[dict]) -> bool:
+        """Update the conversation JSON for a given user and conversation ID."""
+        cur = self.conn.cursor()
+        try:
+            payload = json.dumps(messages, ensure_ascii=False)
+            cur.execute(
+                f"UPDATE {self.conversations_table} SET conversation = %s WHERE user_id = %s AND conversation_id = %s;",
+                (payload, user_id, conversation_id),
+            )
+            return cur.rowcount > 0
         finally:
             cur.close()
 

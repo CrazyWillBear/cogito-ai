@@ -1,5 +1,6 @@
 from typing import Callable
 
+from langchain_core.messages import AnyMessage
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 
@@ -26,10 +27,11 @@ class ResearchAgent:
         self.postgres_filters = postgres_filters if postgres_filters is not None else Postgres()
         self.spinner_controller = spinner_controller
 
-    def run(self, conversation: dict) -> ResearchAgentState:
+    def run(self, conversation: list[AnyMessage]) -> ResearchAgentState:
         """Invoke the Research Agent subgraph with a conversation."""
 
-        res = self.graph.invoke(conversation)
+        init_state = {"conversation": conversation}
+        res = self.graph.invoke(init_state)
         return res
 
     def build(self) -> None:

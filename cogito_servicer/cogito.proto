@@ -3,15 +3,14 @@ syntax = "proto3";
 package cogito;
 
 service Cogito {
-    rpc Ask (Question) returns (Answer);
+    rpc Complete (Conversation) returns (Status);
 }
 
-message Question {
+message Conversation {
     string user_id = 1;
     string conversation_id = 2;
-    string agent = 3;
 }
 
-message Answer {
-    string content = 1;
+message Status {
+    string status = 1;
 }

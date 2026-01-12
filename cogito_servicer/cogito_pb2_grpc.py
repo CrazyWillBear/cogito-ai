@@ -34,17 +34,17 @@ class CogitoStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Ask = channel.unary_unary(
-                '/cogito.Cogito/Ask',
-                request_serializer=cogito__servicer_dot_cogito__pb2.Question.SerializeToString,
-                response_deserializer=cogito__servicer_dot_cogito__pb2.Answer.FromString,
+        self.Complete = channel.unary_unary(
+                '/cogito.Cogito/Complete',
+                request_serializer=cogito__servicer_dot_cogito__pb2.Conversation.SerializeToString,
+                response_deserializer=cogito__servicer_dot_cogito__pb2.Status.FromString,
                 _registered_method=True)
 
 
 class CogitoServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def Ask(self, request, context):
+    def Complete(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,10 +53,10 @@ class CogitoServicer(object):
 
 def add_CogitoServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Ask': grpc.unary_unary_rpc_method_handler(
-                    servicer.Ask,
-                    request_deserializer=cogito__servicer_dot_cogito__pb2.Question.FromString,
-                    response_serializer=cogito__servicer_dot_cogito__pb2.Answer.SerializeToString,
+            'Complete': grpc.unary_unary_rpc_method_handler(
+                    servicer.Complete,
+                    request_deserializer=cogito__servicer_dot_cogito__pb2.Conversation.FromString,
+                    response_serializer=cogito__servicer_dot_cogito__pb2.Status.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -70,7 +70,7 @@ class Cogito(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Ask(request,
+    def Complete(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,9 +83,9 @@ class Cogito(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/cogito.Cogito/Ask',
-            cogito__servicer_dot_cogito__pb2.Question.SerializeToString,
-            cogito__servicer_dot_cogito__pb2.Answer.FromString,
+            '/cogito.Cogito/Complete',
+            cogito__servicer_dot_cogito__pb2.Conversation.SerializeToString,
+            cogito__servicer_dot_cogito__pb2.Status.FromString,
             options,
             channel_credentials,
             insecure,

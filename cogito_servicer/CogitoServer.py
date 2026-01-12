@@ -1,6 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor
 
-from langchain_core.messages import AnyMessage, messages_from_dict
+from langchain_core.messages import AnyMessage, messages_from_dict, AIMessage
 
 from ai.research_agent.ResearchAgent import ResearchAgent
 from cogito_servicer import cogito_pb2_grpc
@@ -13,7 +13,7 @@ process_pool = ProcessPoolExecutor(max_workers=4)
 def _run_agent_task(agent: ResearchAgent, conversation: list[AnyMessage]) -> str:
     """Helper function to run the agent task in a separate process."""
 
-    return agent.run(conversation)
+    return agent.run(conversation).get("response")
 
 def _convert_conversation(conversation: list[dict]) -> list[AnyMessage]:
     """Convert a conversation from dict format to AnyMessage format."""
@@ -30,18 +30,28 @@ class CogitoServer(cogito_pb2_grpc.CogitoServicer):
         self.agent = agent
         self.postgres_db = postgres_db
 
-    def Ask(self, request, context):
+    def Complete(self, request, context):
         """Handle the Ask gRPC method to process user questions."""
 
-        # Extract parameters from the request
-        user_id = request.user_id
-        conversation_id = request.conversation_id
+        try:
+            # Extract parameters from the request
+            user_id = request.user_id
+            conversation_id = request.conversation_id
 
-        # Retrieve the conversation from the Postgres database
-        conversation = self.postgres_db.get_conversation(user_id, conversation_id)
+            # Retrieve the conversation from the Postgres database
+            conversation = self.postgres_db.get_conversation(user_id, conversation_id)
+            conversation = _convert_conversation(conversation)
 
-        # Run the agent in a separate process
-        future = process_pool.submit(_run_agent_task, self.agent, conversation)
-        output = future.result()
+            # Run the agent in a separate process
+            future = process_pool.submit(_run_agent_task, self.agent, conversation)
+            output = future.result()
+            conversation.append(AIMessage(content=output))
 
-        return output
+            # Convert conversation back to dict format and store
+            conversation = [msg.to_dict() for msg in conversation]
+            self.postgres_db.update_conversation(user_id, conversation_id, conversation)
+
+            return "Success"
+
+        except Exception as e:
+            return f"Error: {str(e)}"
