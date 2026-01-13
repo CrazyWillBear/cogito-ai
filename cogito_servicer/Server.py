@@ -14,19 +14,26 @@ class Server:
     def __init__(self, agent: ResearchAgent = None, postgres_db: Postgres = None):
         """Initialize and start the gRPC server for the Cogito service."""
 
+        print("Initializing Cogito gRPC server...")
+
         # Create gRPC server
         self.server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=10)
         )
+
+        print("Building agent...")
 
         # Build agent
         if agent is None:
             agent = ResearchAgent()
             agent.build()
 
+        print("Initializing database...")
         # Initialize database
         if postgres_db is None:
             postgres_db = Postgres()
+
+        print("Adding Cogito servicer to server...")
 
         # Add Cogito servicer to server
         servicer = CogitoServer(agent, postgres_db)
@@ -34,6 +41,8 @@ class Server:
 
     def start(self):
         """Start the gRPC server and listen for requests."""
+
+        print("Starting Cogito gRPC server on port 50051...")
 
         self.server.add_insecure_port("[::]:50051")
         self.server.start()

@@ -27,6 +27,8 @@ class CogitoServer(cogito_pb2_grpc.CogitoServicer):
     def __init__(self, agent: ResearchAgent, postgres_db: Postgres):
         """Initialize the CogitoServer with a ResearchAgent and Postgres database."""
 
+
+        print("Initializing CogitoServer...")
         self.agent = agent
         self.postgres_db = postgres_db
 
@@ -38,6 +40,8 @@ class CogitoServer(cogito_pb2_grpc.CogitoServicer):
             user_id = request.user_id
             conversation_id = request.conversation_id
 
+            print("Attempting to complete conversation for user:", user_id, "conversation:", conversation_id)
+
             # Retrieve the conversation from the Postgres database
             conversation = self.postgres_db.get_conversation(user_id, conversation_id)
             conversation = _convert_conversation(conversation)
@@ -47,6 +51,8 @@ class CogitoServer(cogito_pb2_grpc.CogitoServicer):
             output = future.result()
             conversation.append(AIMessage(content=output))
 
+            print("Completed conversation for user:", user_id, "conversation:", conversation_id)
+
             # Convert conversation back to dict format and store
             conversation = [msg.to_dict() for msg in conversation]
             self.postgres_db.update_conversation(user_id, conversation_id, conversation)
@@ -54,4 +60,6 @@ class CogitoServer(cogito_pb2_grpc.CogitoServicer):
             return "Success"
 
         except Exception as e:
+            print("Error during Complete:", str(e))
+
             return f"Error: {str(e)}"

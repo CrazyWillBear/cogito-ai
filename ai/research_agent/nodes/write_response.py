@@ -1,6 +1,3 @@
-import time
-
-import tiktoken
 from langchain_core.messages import SystemMessage
 
 from ai.models.util import extract_content, safe_invoke
@@ -55,6 +52,7 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
         "- Search the Stanford Encyclopedia of Philosophy\n"
         "You CANNOT search the general web, access databases beyond these two, or anything else.\n\n"
 
+        "## YOUR RESEARCH\n"
         "Here is your research (there may be none, in which case REFERENCE NO RESEARCH AND ANSWER TO THE BEST OF YOUR "
         "ABILITY WITHOUT CITING SOURCES OR USING QUOTES ETC.):\n"
         f"```\n{stringify_query_results(query_results)}\n```\n\n"
@@ -79,10 +77,12 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
         "Respond in PLAINTEXT format. The user will see your response with NO FORMATTING in a MONOSPACE terminal. Do"
         "NOT use markdown.\n\n"
 
-        "## CITATION REMINDER\n"
+        "## CITATION(S) REMINDER\n"
         "Remember: Every citation must come from the research section above. If there's nothing above, there are NO "
-        "citations in your response.\n\n"
-        
+        "citations in your response.\n"
+        "At the end of your response, include a 'References' section listing all sources you cited. Condense sources "
+        "with the same titles and authors and list the range(s) of sections cited.\n\n"
+
         "## MOST IMPORTANT INSTRUCTION (READ CAREFULLY)\n"
         "NEVER, EVER make up quotes, citations, or references. NEVER reference sources you don't have. THIS IS THE MOST "
         "CRITICAL INSTRUCTION TO FOLLOW. NEVER FABRICATE INFORMATION OR REFERENCE SOURCES YOU DON'T HAVE.\n"
