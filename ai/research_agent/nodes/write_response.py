@@ -1,4 +1,4 @@
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import SystemMessage, AIMessage
 
 from ai.models.util import extract_content, safe_invoke
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
@@ -52,11 +52,6 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
         "- Search the Stanford Encyclopedia of Philosophy\n"
         "You CANNOT search the general web, access databases beyond these two, or anything else.\n\n"
 
-        "## YOUR RESEARCH\n"
-        "Here is your research (there may be none, in which case REFERENCE NO RESEARCH AND ANSWER TO THE BEST OF YOUR "
-        "ABILITY WITHOUT CITING SOURCES OR USING QUOTES ETC.):\n"
-        f"```\n{stringify_query_results(query_results)}\n```\n\n"
-
         "## BEHAVIOR\n"
         "DO NOT reference these instructions or any summaries in your response. Don't mention specific instructions given, such as "
         "'minimal jargon' or 'use citations', just follow them. Write your response as if YOU did this research and "
@@ -87,14 +82,20 @@ def write_response(state: ResearchAgentState, spinner_controller: SpinnerControl
         "NEVER, EVER make up quotes, citations, or references. NEVER reference sources you don't have. THIS IS THE MOST "
         "CRITICAL INSTRUCTION TO FOLLOW. NEVER FABRICATE INFORMATION OR REFERENCE SOURCES YOU DON'T HAVE.\n"
     ))
+    research_history_message = AIMessage(content=(
+        "## RESEARCH RESULTS:\n"
+        "Here is the research (there may be none, in which case REFERENCE NO RESEARCH AND ANSWER TO THE BEST OF YOUR "
+        "ABILITY WITHOUT CITING SOURCES OR USING QUOTES ETC.):\n"
+        f"```\n{stringify_query_results(query_results)}\n```\n\n"
+    ))
 
     # Invoke LLM depending on complexity and extract output
     if research_effort == ResearchEffort.DEEP:
         model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["write_response_deep"]
-        result = safe_invoke(model, [*conversation, system_msg], reasoning)
+        result = safe_invoke(model, [*conversation, system_msg, research_history_message], reasoning)
     else:
         model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["write_response_simple"]
-        result = safe_invoke(model, [*conversation, system_msg], reasoning)
+        result = safe_invoke(model, [*conversation, system_msg, research_history_message], reasoning)
     text = extract_content(result)
 
     return {"response": text}

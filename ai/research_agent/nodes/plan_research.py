@@ -1,4 +1,4 @@
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import SystemMessage, AIMessage
 from langchain_core.output_parsers import JsonOutputParser
 
 from ai.models.util import safe_invoke, extract_content
@@ -8,10 +8,9 @@ from ai.research_agent.schemas.ResearchEffort import ResearchEffort
 from ai.research_agent.sources.stringify import stringify_query_results
 from util.SpinnerController import SpinnerController
 
-
 # --- Define constants ---
 MAX_ITERATIONS_DEEP = 10
-MAX_ITERATIONS_SIMPLE = 3
+MAX_ITERATIONS_SIMPLE = 4
 
 SAMPLE_RESPONSE = \
 """
@@ -92,7 +91,10 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
     research_iterations = state.get("research_iterations", 1)
     research_effort = state.get("research_effort", None)
 
-    max_iterations = MAX_ITERATIONS_DEEP if research_effort == ResearchEffort.DEEP else MAX_ITERATIONS_SIMPLE
+    if research_effort == ResearchEffort.DEEP:
+        max_iterations = MAX_ITERATIONS_DEEP
+    else:
+        max_iterations = MAX_ITERATIONS_SIMPLE
 
     # Hard stop to avoid infinite loops in the graph
     if research_iterations > max_iterations:
@@ -109,7 +111,7 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
 
             f"## ITERATION {research_iterations} (1-indexed):\n"
             f"For this task, your hard limit is {max_iterations}, which will be your final iteration. If you finish "
-            f"early, that's more than fine and in fact is encouraged.\n\n"
+            f"early, that's okay.\n\n"
 
             "## SOURCES\n"
             "1. **Vector DB**: Primary source chunks from Project Gutenberg philosophy texts\n"
@@ -154,9 +156,12 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             f"## PREVIOUS QUERIES + RESULTS\n```\n{stringify_query_results(query_results)}\n```"
         )
     )
+    research_history_message = AIMessage(content=(
+        f"PREVIOUS QUERIES + RESULTS:\n```\n{stringify_query_results(query_results)}\n```"
+    ))
 
     # Invoke LLM with structured output and retry parsing on invalid JSON
-    model, reasoning_effort = RESEARCH_AGENT_MODEL_CONFIG.get("plan_research")
+    model, reasoning_effort = RESEARCH_AGENT_MODEL_CONFIG["plan_research"]
     parser = JsonOutputParser()
     max_parse_attempts = 3
     attempt = 0
@@ -168,7 +173,7 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             if spinner_controller:
                 spinner_controller.set_text(f"::Planning next step")
 
-            llm_output = safe_invoke(model, [*conversation, system_msg], reasoning_effort)
+            llm_output = safe_invoke(model, [*conversation, system_msg, research_history_message], reasoning_effort)
             content = extract_content(llm_output)
             result = parser.parse(content)
             break
