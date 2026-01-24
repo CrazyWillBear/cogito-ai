@@ -56,7 +56,6 @@ if __name__ == "__main__":
     conversation = []
 
     # Build agent
-    spinner_controller = SpinnerController()
     agent = ResearchAgent(spinner_controller=spinner_controller)
     agent.build()
 
@@ -64,6 +63,7 @@ if __name__ == "__main__":
     while True:
         # Get user input
         user_input = input("[User]: ")
+
         if user_input.lower() in {"exit", "quit"}:
             break
         conversation.append(HumanMessage(content=user_input))

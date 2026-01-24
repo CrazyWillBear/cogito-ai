@@ -93,10 +93,10 @@ OPENAI_API_KEY=your-openai-key
 ### 4. Run
 ```bash
 # For terminal interface
-python main_cli.py
+python cogito.py
 
 # For gRPC server
-python main_server.py
+python cogito_server.py
 ```
 
 ## Databases

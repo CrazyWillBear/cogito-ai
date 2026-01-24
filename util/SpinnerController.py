@@ -9,8 +9,8 @@ class SpinnerController:
         self.delay = delay
         self.stop = threading.Event()
         self.lock = threading.Lock()
-        self.frames = itertools.cycle("🕛🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚")
-        self.ellipses_frames = itertools.cycle(["", ".", "..", "..."])
+        self.frames = itertools.cycle(["⏳", "⏳", "⌛", "⌛"])
+        self.ellipses_frames = itertools.cycle([".", "..", "..."])
         self.thread = None
 
     def start(self, text=""):

@@ -19,4 +19,4 @@ COPY . /app
 EXPOSE 50051
 
 # Run the server from project root
-CMD ["python", "main_server.py"]
+CMD ["python", "cogito_server.py"]
