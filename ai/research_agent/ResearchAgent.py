@@ -19,13 +19,12 @@ class ResearchAgent:
     """Research Agent subgraph for querying vector DBs and summarizing results."""
 
     # --- Methods ---
-    def __init__(self, qdrant = None, postgres_filters = None, spinner_controller = None):
+    def __init__(self, qdrant = None, postgres_filters = None):
         """Initialize the Research Agent subgraph."""
 
         self.graph = None
         self.qdrant = qdrant if qdrant is not None else Qdrant()
         self.postgres_filters = postgres_filters if postgres_filters is not None else Postgres()
-        self.spinner_controller = spinner_controller
 
     def run(self, conversation: list[AnyMessage]) -> ResearchAgentState:
         """Invoke the Research Agent subgraph with a conversation."""
@@ -46,29 +45,19 @@ class ResearchAgent:
 
         # --- Add agent_assigner ---
         g.add_node(
-            "create_conversation",
-            create_conversation if self.spinner_controller is None
-            else self._wrap(create_conversation, self.spinner_controller)
+            "create_conversation", create_conversation
         )
         g.add_node(
-            "classify_research_needed",
-            classify_research_needed if self.spinner_controller is None
-            else self._wrap(classify_research_needed, self.spinner_controller)
+            "classify_research_needed", classify_research_needed
         )
         g.add_node(
-            "plan_research",
-            plan_research if self.spinner_controller is None
-            else self._wrap(plan_research, self.spinner_controller)
+            "plan_research", plan_research
         )
         g.add_node(
-            "execute_queries",
-            self._wrap(execute_queries, self.qdrant) if self.spinner_controller is None
-            else self._wrap(execute_queries, self.qdrant, self.spinner_controller)
+            "execute_queries", self._wrap(execute_queries, self.qdrant)
         )
         g.add_node(
-            "write_response",
-            write_response if self.spinner_controller is None
-            else self._wrap(write_response, self.spinner_controller)
+            "write_response", write_response
         )
 
         # --- Add edges ---

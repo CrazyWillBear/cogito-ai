@@ -24,6 +24,8 @@ def ai_bubble(text):
 
 def main_loop(agent: ResearchAgent):
 
+    conversation = []
+
     console.clear()
     console.print(Panel("🧠 Cogito is ready", border_style="dim"))
 

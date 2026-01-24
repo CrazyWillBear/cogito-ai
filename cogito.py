@@ -56,7 +56,7 @@ if __name__ == "__main__":
     conversation = []
 
     # Build agent
-    agent = ResearchAgent(spinner_controller=spinner_controller)
+    agent = ResearchAgent()
     agent.build()
 
     # Main loop
