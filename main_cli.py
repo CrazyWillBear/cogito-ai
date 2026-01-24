@@ -5,6 +5,7 @@ from pathlib import Path
 from langchain_core.messages import HumanMessage, AIMessage, messages_to_dict
 
 from ai.research_agent.ResearchAgent import ResearchAgent
+from ai.research_agent.sources.stringify import stringify_query_results
 from util.SpinnerController import SpinnerController
 
 START_TEXT = \
@@ -73,6 +74,7 @@ if __name__ == "__main__":
         output = agent.run(conversation)  # invoke/run agent
         txt_out = output.get('response', 'No response available')
         effort = output.get('research_effort', 'Unknown')
+        results = output.get('query_results')
         spinner_controller.stop_spinner() # stop spinner
         end = time.perf_counter()         # end timing
 
@@ -83,6 +85,7 @@ if __name__ == "__main__":
               f"{txt_out}\n"
               f"---\n"
               f"Time was {end - start:.2f}s - Research level {effort}\n"
+              f"Results found: {stringify_query_results(results)}\n"
         )
 
         # Append AI message to conversation

@@ -14,6 +14,8 @@ class ResearchAgentState(TypedDict):
     response: str                           # Final response generated
 
     research_iterations: int                # Number of research iterations performed
+    long_term_plan: str                     # Long term research plan over multiple iterations
+    short_term_plan: str                    # Short term research plan for the current iteration
     vector_db_queries: list                 # Queries for vector db
     sep_queries: list                       # Queries for Stanford Encyclopedia of Philosophy
     completed: bool                         # If the query results were satisfactory

@@ -17,7 +17,7 @@ def execute_queries(state: ResearchAgentState, qdrant: Qdrant, spinner_controlle
     vector_db_queries = state.get("vector_db_queries", None)
     sep_queries = state.get("sep_queries", None)
 
-    user_query = state.get("conversation", {})[-1].content
+    conversation = state.get("conversation", [])
     query_results = state.get("query_results", [])
     all_results = state.get("all_raw_results", set())
 
@@ -27,7 +27,7 @@ def execute_queries(state: ResearchAgentState, qdrant: Qdrant, spinner_controlle
         if vector_db_queries:
             futures.append(executor.submit(query_vector_db, vector_db_queries, qdrant))
         if sep_queries:
-            futures.append(executor.submit(query_sep, sep_queries, user_query))
+            futures.append(executor.submit(query_sep, sep_queries, conversation))
 
         for future in futures:
             try:
@@ -36,8 +36,10 @@ def execute_queries(state: ResearchAgentState, qdrant: Qdrant, spinner_controlle
                 results = []
             for result in results:
                 raw_result = result.get("result", None)
-                if raw_result not in all_results:
-                    query_results.append(result)
+                if raw_result in all_results:
+                    result["result"] = "[Duplicate Result Omitted, Already Retrieved In Previous Queries]"
+                else:
                     all_results.add(raw_result)
+                query_results.append(result)
 
     return {"query_results": query_results, "all_raw_results": all_results}

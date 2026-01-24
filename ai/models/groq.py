@@ -20,7 +20,7 @@ oss_120b_med = ChatGroq(
 oss_20b = ChatGroq(
     model="openai/gpt-oss-20b",
     temperature=0.0,
-    reasoning_effort="medium",
+    reasoning_effort="low",
     reasoning_format="parsed"
 )
 

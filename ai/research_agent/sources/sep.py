@@ -5,6 +5,7 @@ import json
 
 import aiohttp
 from bs4 import BeautifulSoup
+from langchain_core.messages import SystemMessage, AnyMessage
 
 from ai.models.util import extract_content, safe_invoke
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
@@ -120,7 +121,7 @@ async def _extract_sections_async(url):
             return sections, citation_str
 
 
-def _select_relevant_sections(sections, user_query, article_title):
+def _select_relevant_sections(sections, conversation, article_title):
     """Use LLM to determine which sections are relevant to the user's query."""
     if not sections:
         return []
@@ -134,25 +135,19 @@ def _select_relevant_sections(sections, user_query, article_title):
         section_id = header.split()[0] if header and header[0].isdigit() else str(i + 1)
         section_headers.append(f"{section_id}. {header}")
 
-    prompt = f"""Given a user query and a list of section headers from a Stanford Encyclopedia of Philosophy article, determine which sections are most relevant to answer the query.
-
-User Query: {user_query}
-
-Article Title: {article_title}
-
-Section Headers:
-{chr(10).join(section_headers)}
-
-Please respond with ONLY a JSON array of section identifiers (as strings) that are relevant. 
-For example: ["1", "2.1", "3.4"]
-If the user's query isn't a query or refers to a message that you can't see or is otherwise irrelevant or unclear, try to identify sections that are most relevant to the article itself.
-If no sections are relevant, return an empty array: []
-
-Response:"""
+    system_msg = SystemMessage(content=(
+        "Determine which sections are most relevant to the user's last message:\n"
+        
+        f"Article Title: {article_title}\n"
+        f"Section Headers:\n" + f"{chr(10).join(section_headers)}\n\n"
+        "Respond with ONLY a JSON array of section identifiers (as strings) that are relevant. Only include 1-2 or at "
+        "most 3 section identifiers. Do NOT include any other text.\n\n"
+        "For example: `[\"1\", \"2.1\", \"3.4\"]`\n"
+    ))
 
     try:
         model, reasoning_effort = RESEARCH_AGENT_MODEL_CONFIG.get("extract_text")
-        content = extract_content(safe_invoke(model, prompt, reasoning_effort))
+        content = extract_content(safe_invoke(model, [*conversation, system_msg], reasoning_effort))
 
         # Try to extract JSON from the response
         # Remove markdown code blocks if present
@@ -193,7 +188,7 @@ def _format_section_text(section):
     return f"## {header}\n\n{content}"
 
 
-async def _process_article_async(result, last_user_msg):
+async def _process_article_async(result, conversation):
     """Process a single article: extract sections, select relevant ones, return list of (text, citation) tuples (async)."""
     sections, base_citation = await _extract_sections_async(result["url"])
 
@@ -207,7 +202,7 @@ async def _process_article_async(result, last_user_msg):
         None,
         _select_relevant_sections,
         sections,
-        last_user_msg,
+        conversation,
         result["title"]
     )
 
@@ -228,7 +223,7 @@ async def _process_article_async(result, last_user_msg):
     return tuples
 
 
-async def _query_sep_async(queries: list[str], last_user_msg: str) -> list[QueryResult]:
+async def _query_sep_async(queries: list[str], conversation: list[AnyMessage]) -> list[QueryResult]:
     """Query Stanford Encyclopedia of Philosophy and return list of QueryResult (async)."""
     limit = 1
 
@@ -248,7 +243,7 @@ async def _query_sep_async(queries: list[str], last_user_msg: str) -> list[Query
             jobs.append((query, result))
 
     # Process all articles concurrently
-    article_tasks = [_process_article_async(result, last_user_msg) for (query, result) in jobs]
+    article_tasks = [_process_article_async(result, conversation) for (query, result) in jobs]
     all_article_tuples = await asyncio.gather(*article_tasks, return_exceptions=True)
 
     # Map from query -> list[(text, citation)]
@@ -274,7 +269,7 @@ async def _query_sep_async(queries: list[str], last_user_msg: str) -> list[Query
     return results
 
 
-def query_sep(queries: list[str], last_user_msg: str) -> list[QueryResult]:
+def query_sep(queries: list[str], conversation: list[AnyMessage]) -> list[QueryResult]:
     """Query Stanford Encyclopedia of Philosophy and return list of QueryResult.
 
     Each QueryResult will have:
@@ -283,4 +278,4 @@ def query_sep(queries: list[str], last_user_msg: str) -> list[QueryResult]:
 
     This is a synchronous wrapper around the async implementation.
     """
-    return asyncio.run(_query_sep_async(queries, last_user_msg))
+    return asyncio.run(_query_sep_async(queries, conversation))

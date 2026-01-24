@@ -10,12 +10,14 @@ from util.SpinnerController import SpinnerController
 
 # --- Define constants ---
 MAX_ITERATIONS_DEEP = 10
-MAX_ITERATIONS_SIMPLE = 4
+MAX_ITERATIONS_SIMPLE = 5
 
 SAMPLE_RESPONSE = \
 """
 # Standard query (don't put ANY comments in your response)
 {
+  "long_term_plan":  "sample plan",  # long term research plan, can be over multiple iterations
+  "short_term_plan": "sample plan",  # short term plan for the current iteration
   "vector_db_queries": [  # must be a list of query + filter objects or null
     {
       "query": "sample query",  # must be a string
@@ -36,8 +38,10 @@ SAMPLE_RESPONSE = \
 }
 # To end research
 {
-    "vector_db_queries": null,              # you can also just set one of these to null
-    "stanford_encyclopedia_queries": null   # if you want to use one instead of both
+    "long_term_plan": null,
+    "short_term_plan": null,
+    "vector_db_queries": null,
+    "stanford_encyclopedia_queries": null
 }
 """
 
@@ -88,6 +92,8 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
     # Extract graph state variables
     conversation = state.get("conversation", [])
     query_results = state.get("query_results", [])
+    long_term_plan = state.get("long_term_plan", "No long term plan yet.")
+    short_term_plan = state.get("short_term_plan", "No short term plan yet.")
     research_iterations = state.get("research_iterations", 1)
     research_effort = state.get("research_effort", None)
 
@@ -106,8 +112,8 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
     system_msg = SystemMessage(
         content=(
             "## YOUR ROLE\n"
-            "You are a research query planner. Analyze the user's question and generate search queries for two sources, "
-            "or stop research by returning null for all fields.\n\n"
+            "You are a research planner. Analyze the user's question and generate a plan + search queries for two "
+            "sources, or stop research by returning null for all fields.\n\n"
 
             f"## ITERATION {research_iterations} (1-indexed):\n"
             f"For this task, your hard limit is {max_iterations}, which will be your final iteration. If you finish "
@@ -128,36 +134,44 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             "**Both**: Idea genealogy, comparing sources with concepts, evidence + interpretation\n\n"
 
             "## QUERY RULES\n"
-            "- MAX 5 queries for Project Gutenberg Vector DB (for this iteration, not total)\n"
-            "- Max 2 queries for SEP (for this iteration, not total)\n"
-            "- MIN 1 completed query total across all sources\n"
+            "- MAX 3 queries for Project Gutenberg Vector DB (for this iteration, not total)\n"
+            "- Max 1 queries for SEP (for this iteration, not total)\n"
+            "- MIN 1 successful query total across all sources\n"
             "- NEVER repeat past queries\n"
             "- Vector DB: Contains both large and medium sized chunks, can be broad or specific. Can be searched both "
             "semantically and normally.\n"
             f"- SEP:\n\"\"\"{SEP_SEARCH_RULES}\"\"\"\n\n"
 
             "## END RESEARCH WHEN:\n"
-            "- You have 1-2 relevant results with relevant content (simple questions)\n"
+            "- You have 2-3 RELEVANT results with relevant content (simple questions)\n"
             "- You have sufficient research (>=3 relevant results) to answer the question (medium-to-complex questions)\n"
-            "- Past queries show necessary sources are unavailable/irrelevant\n\n"
+            "- Past queries show ABSOLUTELY NECESSARY sources are unavailable/irrelevant\n\n"
             
             "## HOW TO END RESEARCH:\n"
-            "Set both `stanford_encyclopedia_queries` and `vector_db_queries` to `null`\n\n"
+            "Set all fields, `long_term_plan`, `short_term_plan`, `stanford_encyclopedia_queries` and "
+            "`vector_db_queries` to `null`\n\n"
             
             "## IN YOUR REASONING/OUTPUT:\n"
             "Do NOT formulate the final response. Reason about the comprehensiveness of prior research and what is needed "
-            "next, if anything. Consider how many iterations have occurred and the complexity of the question.\n\n"
+            "next, if anything. Consider how many iterations have occurred and the complexity of the question. You "
+            "should rarely revise your long term plan, only doing so when needed. Revise your short term plan every"
+            "iteration.\n\n"
             
             "## ADVICE:\n"
             "- If a user asks about previous research that you don't have, re-query for those sources.\n"
-            "- If prior queries yielded no results, adjust your approach\n"
-            "- If a resource is missing from the database, note it and avoid re-querying it\n\n"
-
-            f"## PREVIOUS QUERIES + RESULTS\n```\n{stringify_query_results(query_results)}\n```"
+            "- Think about what sources (specific books, essays, etc.) would be best to answer the question.\n"
+            "- If a resource is missing from the database, avoid re-querying it.\n"
+            "- IF A PREVIOUS QUERY RETURNED IRRELEVANT INFORMATION, REWRITE THAT QUERY TO BE MORE FOCUSED / OTHERWISE "
+            "FIX IT AND TRY AGAIN.\n"
         )
     )
-    research_history_message = AIMessage(content=(
-        f"PREVIOUS QUERIES + RESULTS:\n```\n{stringify_query_results(query_results)}\n```"
+    research_history_message = SystemMessage(content=(
+        f"YOUR LONG TERM PLAN:\n"
+        f"\"{long_term_plan}\"\n\n"
+        f"YOUR SHORT TERM PLAN (PREVIOUS ITERATION):\n"
+        f"\"{short_term_plan}\"\n\n"
+        f"PREVIOUS QUERIES + RESULTS:\n"
+        f"```\n{stringify_query_results(query_results)}\n```\n\n"
     ))
 
     # Invoke LLM with structured output and retry parsing on invalid JSON
@@ -173,7 +187,7 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
             if spinner_controller:
                 spinner_controller.set_text(f"::Planning next step")
 
-            llm_output = safe_invoke(model, [*conversation, system_msg, research_history_message], reasoning_effort)
+            llm_output = safe_invoke(model, [*conversation, research_history_message, system_msg], reasoning_effort)
             content = extract_content(llm_output)
             result = parser.parse(content)
             break
@@ -189,11 +203,19 @@ def plan_research(state: ResearchAgentState, spinner_controller: SpinnerControll
         return {"completed": True}
 
     # Check for research completion
-    if not result.get("vector_db_queries") and not result.get("stanford_encyclopedia_queries"):
+    long_term_plan, short_term_plan, vector_db_queries, sep_queries = (
+        result.get("long_term_plan"),
+        result.get("short_term_plan"),
+        result.get("vector_db_queries"),
+        result.get("stanford_encyclopedia_queries")
+    )
+    if not long_term_plan and not short_term_plan and not vector_db_queries and not sep_queries:
         return {"completed": True}
 
     return {
-        "vector_db_queries": result.get("vector_db_queries"),
-        "sep_queries": result.get("stanford_encyclopedia_queries"),
+        "long_term_plan": long_term_plan,
+        "short_term_plan": short_term_plan,
+        "vector_db_queries": vector_db_queries,
+        "sep_queries": sep_queries,
         "research_iterations": research_iterations + 1,
     }

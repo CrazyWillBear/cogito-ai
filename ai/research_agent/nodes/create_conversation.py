@@ -40,6 +40,8 @@ def create_conversation(state: ResearchAgentState, spinner_controller: SpinnerCo
 
     # Initialize remaining required keys in state
     state.setdefault('response', '')
+    state.setdefault('long_term_plan', 'No long term plan yet.')
+    state.setdefault('short_term_plan', 'No short term plan yet.')
     state.setdefault('vector_db_queries', [])
     state.setdefault('sep_queries', [])
     state.setdefault('research_iterations', 1)

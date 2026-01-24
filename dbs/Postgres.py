@@ -91,8 +91,10 @@ class Postgres:
 
         cur.close()
 
-    def get_conversation(self, user_id: str, conversation_id: str):
+    def get_conversation(self, user_id: str | int, conversation_id: str):
         """Retrieve conversation data for a given user and conversation ID."""
+
+        user_id = int(user_id)
 
         cur = self.conn.cursor()
         try:
