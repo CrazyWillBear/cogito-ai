@@ -104,9 +104,10 @@ class Postgres:
                 (user_id, conversation_id),
             )
             row = cur.fetchone()
-            if row is None:
-                return None
-            return row[0]
+            if row:
+                raw_data = row[0]
+                return json.loads(raw_data)
+            return None
         finally:
             cur.close()
 

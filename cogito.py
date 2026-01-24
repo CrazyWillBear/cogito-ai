@@ -6,7 +6,7 @@ from langchain_core.messages import HumanMessage, AIMessage, messages_to_dict
 
 from ai.research_agent.ResearchAgent import ResearchAgent
 from ai.research_agent.sources.stringify import stringify_query_results
-from util.SpinnerController import SpinnerController
+from cli.SpinnerController import SpinnerController
 
 START_TEXT = \
 r"""

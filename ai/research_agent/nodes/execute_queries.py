@@ -2,7 +2,7 @@ from ai.research_agent.sources.sep import query_sep
 from ai.research_agent.sources.vector_db import query_vector_db
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from dbs.Qdrant import Qdrant
-from util.SpinnerController import SpinnerController
+from cli.SpinnerController import SpinnerController
 from concurrent.futures import ThreadPoolExecutor
 
 

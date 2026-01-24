@@ -6,7 +6,7 @@ from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from ai.research_agent.schemas.ResearchEffort import ResearchEffort
 from ai.research_agent.sources.stringify import stringify_query_results
-from util.SpinnerController import SpinnerController
+from cli.SpinnerController import SpinnerController
 
 # --- Define constants ---
 MAX_ITERATIONS_DEEP = 10

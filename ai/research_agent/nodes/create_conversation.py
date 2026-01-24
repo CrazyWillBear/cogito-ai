@@ -7,7 +7,7 @@ from ai.models.util import extract_content, safe_invoke
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from ai.research_agent.schemas.ResearchEffort import ResearchEffort
-from util.SpinnerController import SpinnerController
+from cli.SpinnerController import SpinnerController
 
 
 def create_conversation(state: ResearchAgentState, spinner_controller: SpinnerController = None):
