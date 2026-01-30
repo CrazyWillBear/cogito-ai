@@ -2,19 +2,19 @@
 
 ## One-liner
 
-An Q&A-style AI agent for philosophy research that searches various sources to gather evidence and synthesize answers.
+A chatbot-style agent for philosophy research that performs research to gather evidence and synthesize answers.
 
 ## Summary
 
-Cogito AI is an AI research assistant designed to help users explore philosophical questions by searching authoritative sources like the Stanford Encyclopedia of Philosophy and a curated set of Project Gutenberg texts. It leverages LLMs to generate context-aware queries, retrieve relevant sources, and synthesize well-supported answers with full citations.
+Cogito AI is an AI research assistant designed to help users explore philosophical questions by searching authoritative sources like the Stanford Encyclopedia of Philosophy and a curated set of Project Gutenberg texts. It leverages LLMs to generate context-aware queries, retrieve relevant sources, and synthesize well-supported answers with full citations. The model architecture is fully customizable, including support for Groq, OpenAI, and local LLMs (see more below).
 
 ## Realtime Demo
 
-### Comparing philosophers' ideas
+### Defining philosophical concept
 
 <img src="https://mirrors.williamchastain.com/images/Cogito%20CLI%20Demo.gif" alt="Cogito Demo Gif" width="600"/>
 
-### Defining philosophical concept
+### Comparing philosophers' ideas
 
 <img src="https://mirrors.williamchastain.com/images/Cogito%20CLI%20Demo%202.gif" alt="Cogito Demo Gif 2" width="600"/>
 
@@ -26,11 +26,12 @@ Cogito AI is an AI research assistant designed to help users explore philosophic
 - Parallel resource retrieval and text-extraction
 - Planning and iterative research with chain-of-thought reasoning
 - Citation-backed responses with quoted evidence
+- Low hallucination rate from prompt/evidence formatting and source grounding
 
 ## Prerequisites
 
 - Python 3.10+
-- Linux / macOS / WSL (not Windows)
+- Linux / macOS / Windows
 - Docker
 - Groq API key (or OpenAI API key / local setup for custom configuration, see below)
 
@@ -87,7 +88,7 @@ COGITO_POSTGRES_USER=your_user_here
 COGITO_POSTGRES_PASSWORD=your_password_here
 
 # OpenAI (or configure local LLM)
-OPENAI_API_KEY=your-openai-key
+GROQ_API_KEY=your-groq-key
 ```
 
 ### 4. Run
@@ -114,11 +115,11 @@ python cogito_server.py
 
 ## Architecture & Important Files (quick map)
 
-- `main_cli.py` — CLI loop.
-- `main_server.py` — gRPC server entrypoint.
+- `cogito.py` — CLI loop.
+- `cogito_server.py` — gRPC server entrypoint.
 - `cogito_servicer/` — gRPC server implementation.
 - `ai/research_agent/` — research agent graph, nodes, and schemas.
-- `ai/models/model_config.py` — model + reasoning effort config per LLM call.
+- `ai/model_config.py` — model config.
 - `dbs/` — Qdrant and PostgreSQL classes.
 - `embed/` — embedding logic.
 
