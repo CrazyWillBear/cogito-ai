@@ -3,6 +3,7 @@ from typing import Callable
 from langchain_core.messages import AnyMessage
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
+from rich.status import Status
 
 from ai.research_agent.nodes.classify_research_needed import classify_research_needed
 from ai.research_agent.nodes.create_conversation import create_conversation
@@ -25,11 +26,13 @@ class ResearchAgent:
         self.graph = None
         self.qdrant = qdrant if qdrant is not None else Qdrant()
         self.postgres_filters = postgres_filters if postgres_filters is not None else Postgres()
+        self.status = None
 
-    def run(self, conversation: list[AnyMessage]) -> ResearchAgentState:
+    def run(self, conversation: list[AnyMessage], status: Status | None) -> ResearchAgentState:
         """Invoke the Research Agent subgraph with a conversation."""
 
         init_state = {"conversation": conversation}
+        self.status = status
         res = self.graph.invoke(init_state)
         return res
 
@@ -45,19 +48,19 @@ class ResearchAgent:
 
         # --- Add agent_assigner ---
         g.add_node(
-            "create_conversation", create_conversation
+            "create_conversation", self._wrap(create_conversation)
         )
         g.add_node(
-            "classify_research_needed", classify_research_needed
+            "classify_research_needed", self._wrap(classify_research_needed)
         )
         g.add_node(
-            "plan_research", plan_research
+            "plan_research", self._wrap(plan_research)
         )
         g.add_node(
             "execute_queries", self._wrap(execute_queries, self.qdrant)
         )
         g.add_node(
-            "write_response", write_response
+            "write_response", self._wrap(write_response)
         )
 
         # --- Add edges ---
@@ -84,11 +87,16 @@ class ResearchAgent:
         self.qdrant.close()
         self.postgres_filters.close()
 
-    @staticmethod
-    def _wrap(func: Callable, *args, **kwargs) -> Callable:
-        """Wrap a node so it receives `state` plus any extra args/kwargs."""
+    def _wrap(self, func: Callable, *args, **kwargs) -> Callable:
+        """Wrap a node so it receives `state` plus any extra args/kwargs.
+
+        This is an instance method (not static) so the returned wrapper can
+        read the current value of `self.status` at invocation time. That
+        allows callers to call `agent.build()` before `agent.run(status=...)`
+        and still have the nodes receive the Status object passed to run().
+        """
 
         def wrapped(state):
-            return func(state, *args, **kwargs)
+            return func(state, *args, status=self.status, **kwargs)
 
         return wrapped

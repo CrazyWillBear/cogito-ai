@@ -1,27 +1,25 @@
-import time
-
 import tiktoken
 from langchain_core.messages import HumanMessage, SystemMessage
+from rich.status import Status
 
 from ai.models.util import extract_content, safe_invoke
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
 from ai.research_agent.schemas.ResearchAgentState import ResearchAgentState
 from ai.research_agent.schemas.ResearchEffort import ResearchEffort
-from cli.SpinnerController import SpinnerController
 
 
-def create_conversation(state: ResearchAgentState, spinner_controller: SpinnerController = None):
+def create_conversation(state: ResearchAgentState, status: Status | None):
     """Initialize a new conversation by summarizing prior messages and extracting the last user message."""
 
-    if spinner_controller:
-        spinner_controller.start("::Preparing agent")
+    if status:
+        status.update("Reading your messages...")
 
     # Extract graph state variables
     conversation = state.get("conversation", [])
 
     token_limit = 10000
     tokenizer = tiktoken.get_encoding("cl100k_base")
-    tokens = len(tokenizer.encode(str([msg.content for msg in conversation])))
+    tokens = sum(len(tokenizer.encode(msg.content)) for msg in conversation)
     if tokens > token_limit:
         model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["create_conversation_summary"]
 
@@ -31,7 +29,10 @@ def create_conversation(state: ResearchAgentState, spinner_controller: SpinnerCo
             "You are a conversation summarizer. Your job is to summarize the conversation between the user and the AI "
             "assistant up until and excluding this message, focusing on the key points addressed, questions asked, and "
             "any relevant context that would help. Note philosophers, sources, and concepts discussed.\n\n"
-            "Your summary should at most half the length of the original conversation.\n"
+            "Your summary should at most half the length of the original conversation.\n\n"
+            
+            "## STRICT RULES\n"
+            "NEVER make tool calls of any kind.\n"
         ))
 
         # Invoke model and extract content

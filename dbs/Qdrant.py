@@ -1,9 +1,11 @@
 import os
+import uuid
 
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import MatchValue, FieldCondition, Filter
 from rapidfuzz import process
 
+from ai.research_agent.schemas.Citation import Citation
 from ai.research_agent.schemas.QueryResult import QueryResult
 from dbs.Postgres import Postgres
 from dbs.QueryAndFilterSchemas import QueryAndFilters
@@ -142,10 +144,10 @@ class Qdrant:
                     author = payload.get("author", "null")
                     source_title = payload.get("title", "null")
                     section = payload.get("section", "null")
-                    citation = f"Author: {author}\nSource Title: {source_title}\nSection: {section}\n"
+                    citation: Citation = {"title": source_title, "authors": [author], "source": "Project Gutenberg", "section": section}
 
                     result = (content, citation)
-                    r: QueryResult = {"query": query, "source": "Project Gutenberg Vector DB", "result": result}
+                    r: QueryResult = {"id": int(uuid.uuid4()), "query": query, "source": "Project Gutenberg Vector DB", "result": result}
                     results_out.append(r)
 
         return results_out

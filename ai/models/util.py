@@ -17,7 +17,10 @@ def extract_content(result):
     return str(result).strip()
 
 def safe_invoke(model, messages, reasoning_effort):
-    """Invoke a model with optional reasoning parameters, handling models that may not support reasoning."""
+    """Invoke a model with optional reasoning parameters, handling models that may not support reasoning.
+
+    Also ensures no tool calls are made by unbinding any tools from the model.
+    """
 
     kwargs = {}
 
@@ -25,4 +28,7 @@ def safe_invoke(model, messages, reasoning_effort):
     if reasoning_effort is not None:
         kwargs["reasoning"] = {"effort": reasoning_effort}
 
-    return model.invoke(messages, **kwargs)
+    model = model.bind_tools([], tool_choice="none")
+    result = model.invoke(messages, **kwargs)
+
+    return result

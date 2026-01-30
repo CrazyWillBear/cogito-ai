@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import uuid
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -9,6 +10,7 @@ from langchain_core.messages import SystemMessage, AnyMessage
 
 from ai.models.util import extract_content, safe_invoke
 from ai.research_agent.model_config import RESEARCH_AGENT_MODEL_CONFIG
+from ai.research_agent.schemas.Citation import Citation
 from ai.research_agent.schemas.QueryResult import QueryResult
 
 
@@ -54,7 +56,7 @@ async def _extract_sections_async(url):
             soup = BeautifulSoup(text, "html.parser")
 
             # Extract citation metadata
-            citation = {}
+            citation: Citation = {"title": "", "authors": [], "source": ""}
             title_meta = soup.find("meta", property="citation_title")
             if title_meta:
                 citation["title"] = title_meta.get("content", "")
@@ -67,19 +69,12 @@ async def _extract_sections_async(url):
 
             date_meta = soup.find("meta", property="citation_publication_date")
             if date_meta:
-                citation["publication_date"] = date_meta.get("content", "")
-
-            author_str = ", ".join(authors) if authors else "Unknown"
-            citation_str = (
-                f"{author_str}. \"{citation.get('title', 'Unknown')}\" "
-                f"Stanford Encyclopedia of Philosophy ({citation.get('publication_date', 'n.d.')}). "
-                f"{url}"
-            )
+                citation["source"] = "Stanford Encyclopedia of Philosophy - " + date_meta.get("content", "")
 
             # Extract sections
             main_content = soup.find("div", id="main-text")
             if not main_content:
-                return [], citation_str
+                return [], citation
 
             sections = []
             current_section = None
@@ -118,7 +113,7 @@ async def _extract_sections_async(url):
             if current_section:
                 sections.append(current_section)
 
-            return sections, citation_str
+            return sections, citation
 
 
 def _select_relevant_sections(sections, conversation, article_title):
@@ -140,14 +135,14 @@ def _select_relevant_sections(sections, conversation, article_title):
         
         f"Article Title: {article_title}\n"
         f"Section Headers:\n" + f"{chr(10).join(section_headers)}\n\n"
-        "Respond with ONLY a JSON array of section identifiers (as strings) that are relevant. Only include 1-2 or at "
-        "most 3 section identifiers. Do NOT include any other text.\n\n"
-        "For example: `[\"1\", \"2.1\", \"3.4\"]`\n"
+        "Respond with ONLY an array of section identifiers as strings that are relevant. Only include at "
+        "most 5 section identifiers. Do NOT include any other text and DO NOT make any tool calls.\n\n"
+        "This exact format: `[\"1\", \"2.1\", \"3.4\"]`. Nothing other than the brackets and section identifiers in between them.\n"
     ))
 
     try:
         model, reasoning_effort = RESEARCH_AGENT_MODEL_CONFIG.get("extract_text")
-        content = extract_content(safe_invoke(model, [*conversation, system_msg], reasoning_effort))
+        content = extract_content(safe_invoke(model, [*conversation[-3:], system_msg], reasoning_effort))
 
         # Try to extract JSON from the response
         # Remove markdown code blocks if present
@@ -214,11 +209,8 @@ async def _process_article_async(result, conversation):
     for section in relevant_sections:
         section_text = _format_section_text(section)
         # Add section header to citation
-        section_citation = (
-            f"Stanford Encyclopedia of Philosophy; {base_citation}, "
-            f"Section: {section['header']}"
-        )
-        tuples.append((section_text, section_citation))
+        base_citation["section"] = section["header"]
+        tuples.append((section_text, base_citation))
 
     return tuples
 
@@ -264,7 +256,7 @@ async def _query_sep_async(queries: list[str], conversation: list[AnyMessage]) -
     results: list[QueryResult] = []
     for query, tuples in per_query_tuples.items():
         for section_tuple in tuples:
-            results.append(QueryResult(query=query, source="SEP", result=section_tuple))
+            results.append(QueryResult(id=int(uuid.uuid4()), query=query, source="SEP", result=section_tuple))
 
     return results
 

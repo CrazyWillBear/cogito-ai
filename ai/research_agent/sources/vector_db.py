@@ -5,7 +5,6 @@ from dbs.QueryAndFilterSchemas import QueryAndFilters
 def query_vector_db(queries: list[QueryAndFilters], qdrant: Qdrant):
     """Query the vector db and extract text in parallel."""
 
-
     try:
         response = qdrant.batch_query(queries)
     except Exception as e:
