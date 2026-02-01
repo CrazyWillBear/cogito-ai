@@ -25,8 +25,8 @@ cd cogito-ai
 Pull and run the pre-populated databases using Docker:
 
 ```bash
-# Qdrant vector database (philosophy embeddings, only uses gRPC)
-docker run -p 6333:6333 -p 6334:6334 \
+# Qdrant vector database (philosophy embeddings)
+docker run -p 6334:6334 \
   -e QDRANT__SERVICE__API_KEY=your-secret-key \
   crazywillbear/cogito-vectors:latest
 
@@ -71,8 +71,8 @@ COGITO_QDRANT_COLLECTION=philosophy
 COGITO_POSTGRES_HOST=localhost
 COGITO_POSTGRES_PORT=5432
 COGITO_POSTGRES_DBNAME=cogito
-COGITO_POSTGRES_USER=your_user_here
-COGITO_POSTGRES_PASSWORD=your_password_here
+COGITO_POSTGRES_USER=your-user-here
+COGITO_POSTGRES_PASSWORD=your-password-here
 
 # LLM API Key (Groq recommended)
 GROQ_API_KEY=your-groq-key

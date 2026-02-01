@@ -121,7 +121,7 @@ Configurable LLM backends:
 
 #### Qdrant Vector Database (`Qdrant.py`)
 
-- Stores 212,248 embeddings from Project Gutenberg philosophy texts
+- Stores over 212,000 embeddings from Project Gutenberg philosophy texts
 - Supports fuzzy-matched filtering by author and source
 - Batch query capabilities for efficient retrieval
 

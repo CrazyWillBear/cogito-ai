@@ -115,7 +115,7 @@ docker run -d \
 
 The Qdrant database contains:
 
-- **212,248 embeddings** from Project Gutenberg philosophy texts
+- **Over 212,000 embeddings** from Project Gutenberg philosophy texts
 - Chunked text with metadata (section, source title, authors)
 
 Connection parameters:

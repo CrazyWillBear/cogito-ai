@@ -80,7 +80,7 @@ Cogito automatically determines the appropriate research depth:
 
 | Level | Name | Description | Iterations |
 |-------|------|-------------|------------|
-| 0 | NONE | No research needed (casual conversation) | 0 |
+| 0 | NONE | No research needed (casual conversation) | N/A |
 | 1 | SIMPLE | Basic research for straightforward questions | Up to 5 |
 | 2 | DEEP | Deep research for complex, multifaceted questions | Up to 8 |
 
