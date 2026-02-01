@@ -274,4 +274,5 @@ def query_sep(queries: list[str], conversation: list[AnyMessage]) -> list[QueryR
 
     This is a synchronous wrapper around the async implementation.
     """
+
     return asyncio.run(_query_sep_async(queries, conversation))

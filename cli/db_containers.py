@@ -89,8 +89,8 @@ def _wait_for_running(container, timeout: int = 60, interval: float = 1.0) -> bo
     while time.monotonic() < deadline:
         container.reload()
         if container.status == "running":
+            time.sleep(2)  # Give a bit of extra time for the service to be ready
             return True
         time.sleep(interval)
 
-    time.sleep(2)  # allow time for containers to spin up
     return False

@@ -3,10 +3,8 @@ import time
 
 from langchain_core.messages import messages_to_dict, HumanMessage, AIMessage
 from rich.console import Console
-from rich.markdown import TableElement
 from rich.panel import Panel
 from rich.prompt import Prompt
-from rich.table import Table
 
 from ai.research_agent.ResearchAgent import ResearchAgent
 from ai.research_agent.schemas.ResearchEffort import ResearchEffort
