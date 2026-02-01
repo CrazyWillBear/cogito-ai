@@ -96,7 +96,7 @@ GROQ_API_KEY=your-groq-key
 # For terminal interface
 python cogito.py
 
-# For gRPC server
+# For gRPC server, where in production environments you must ensure Qdrant TLS is configured in `dbs/Qdrant.py`
 python cogito_server.py
 ```
 

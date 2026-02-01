@@ -1,0 +1,27 @@
+[
+    {
+        "type": "human",
+        "data": {
+            "content": "compare apples and oranges in a table",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+        }
+    },
+    {
+        "type": "ai",
+        "data": {
+            "content": "**Apples vs. Oranges**\n\n| Feature | Apples | Oranges |\n|---------|--------|---------|\n| **Family** | *Rosaceae* | *Rutaceae* |\n| **Typical Shape** | Rounded, slightly flattened | Roughly spherical |\n| **Skin Texture** | Smooth to slightly dimpled | Rough, pitted |\n| **Common Colors** | Red, green, yellow | Orange (sometimes pink or white) |\n| **Flavor Profile** | Sweet to tart, varies by variety | Sweet with a pronounced citrus tang |\n| **Culinary Uses** | Raw, pies, sauces, ciders | Raw, juices, marmalades, zest |\n| **Nutrient Highlights** | Vitamin\u202fC, fiber, quercetin | Vitamin\u202fC, folate, flavonoids |\n| **Seasonality** | Harvested late summer\u2013early autumn | Harvested mid\u2011winter to spring |\n| **Storage** | Keeps 1\u20132\u202fweeks at room temp, longer refrigerated | Keeps 1\u20132\u202fweeks at room temp, longer refrigerated |\n| **Common Varieties** | Gala, Fuji, Granny\u202fSmith, Honeycrisp | Navel, Valencia, Blood\u2011orange, Seville |\n| **Cultural Symbolism** | Often used to illustrate \u201can apple a day keeps the doctor away\u201d | Often associated with citrus festivals, vitamin\u202fC |\n| **Typical Price Range** | $1\u2013$3 per pound (US) | $1\u2013$4 per pound (US) |\n\nFeel free to let me know if you'd like a deeper dive into any particular aspect!",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+        }
+    }
+]

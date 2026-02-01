@@ -1,5 +1,6 @@
 import os
 import uuid
+import warnings
 
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import MatchValue, FieldCondition, Filter
@@ -11,6 +12,14 @@ from dbs.Postgres import Postgres
 from dbs.QueryAndFilterSchemas import QueryAndFilters
 from embed.Embedder import Embedder
 
+# Cogito is meant to only be run in Docker compositions where Qdrant ports isn't publicly exposed or on local systems
+# without HTTPS. Change this and line #37 accordingly.
+warnings.filterwarnings(
+ "ignore",
+ message=r"Api key is used with an insecure connection\.",
+ category=UserWarning,
+ module=r"dbs\.Qdrant",
+)
 
 class Qdrant:
     """Qdrant vector database client with fuzzy-matched filtering."""
@@ -25,7 +34,7 @@ class Qdrant:
         self.collection = os.getenv("COGITO_QDRANT_COLLECTION")
 
         # --- Initialize database clients ---
-        self.client = QdrantClient(url=url, grpc_port=port, prefer_grpc=True, https=False)#, api_key=api_key)
+        self.client = QdrantClient(url=url, grpc_port=port, prefer_grpc=True, https=False, api_key=api_key)
         self.postgres_client = Postgres()
         self.embedder = Embedder()
 

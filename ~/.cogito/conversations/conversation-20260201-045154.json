@@ -1,0 +1,27 @@
+[
+    {
+        "type": "human",
+        "data": {
+            "content": "compare apples and oranges in a table",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+        }
+    },
+    {
+        "type": "ai",
+        "data": {
+            "content": "**Apples vs. Oranges \u2013 A Quick Comparative Table**\n\n| Feature | Apples | Oranges |\n|---------|--------|---------|\n| **Family** | *Rosaceae* | *Rutaceae* |\n| **Common Varieties** | Gala, Fuji, Honeycrisp, Granny\u2011Smith | Navel, Valencia, Blood, Seville (bitter) |\n| **Typical Shape** | Oblong/round, symmetrical | Roughly spherical, slightly flattened |\n| **Skin Texture** | Smooth to slightly dimpled | Rough, pitted, often with a waxy coating |\n| **Color** | Red, green, yellow, or mixed | Orange (various shades), sometimes pink or white |\n| **Flavor Profile** | Sweet to tart, with subtle floral or earthy undertones | Sweet\u2011citrus, sometimes tart or bitter (especially in unripe fruit) |\n| **Texture** | Firm, crisp, juicy | Juicy, segmented, soft flesh |\n| **Primary Nutrients** | Vitamin\u202fC, dietary fiber, quercetin | Vitamin\u202fC, folate, potassium, flavonoids |\n| **Common Culinary Uses** | Raw snack, pies, sauces, applesauce, cider | Fresh juice, zest, marmalade, salads, desserts |\n| **Storage & Shelf\u2011Life** | Keeps well in cool, dry conditions; lasts 2\u20134\u202fweeks | Best consumed within a week of purchase; refrigeration slows ripening |\n| **Cultural Symbolism** | Often linked to knowledge, temptation, health (\u201can apple a day\u201d) | Associated with citrus, freshness, and tropical climates; symbol of vitality |\n| **Seasonality** | Late summer to early autumn (varies by variety) | Winter to spring (pears and citrus peak in colder months) |\n\nThis table offers a concise side\u2011by\u2011side snapshot of the most salient differences between apples and oranges, useful for culinary, nutritional, or cultural discussions.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+        }
+    }
+]

@@ -1,0 +1,27 @@
+[
+    {
+        "type": "human",
+        "data": {
+            "content": "compare apples and oranges in a table",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+        }
+    },
+    {
+        "type": "ai",
+        "data": {
+            "content": "Below is a concise comparison of apples and oranges across several dimensions:\n\n| Feature | Apple | Orange |\n|---------|-------|--------|\n| **Botanical family** | Rosaceae | Rutaceae |\n| **Common varieties** | Gala, Fuji, Honeycrisp, Granny\u2011Smith | Navel, Valencia, Blood, Clementine |\n| **Typical flavor profile** | Sweet to tart, crisp crunch | Sweet\u2011tart, juicy segments with a slightly bitter rind |\n| **Texture** | Firm, crisp flesh | Soft, segmented flesh with a fibrous membrane |\n| **Culinary uses** | Raw eating, pies, sauces, ciders | Raw eating, juices, marmalades, zest in savory dishes |\n| **Nutrient highlights** | Vitamin\u202fC, dietary fiber, quercetin | Vitamin\u202fC, folate, hesperidin |\n| **Seasonality (US)** | Fall to early winter | Winter to spring |\n| **Shelf\u2011life** | 4\u20136\u202fweeks at room temp, longer refrigerated | 1\u20132\u202fweeks at room temp, longer refrigerated |\n| **Cultural symbolism** | Often associated with knowledge, temptation, health | Frequently linked to citrus, warmth, and the \u201corange\u201d in \u201corange peel\u201d traditions |\n\nThis table captures the main distinctions and similarities you might encounter when comparing these two popular fruits.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+        }
+    }
+]

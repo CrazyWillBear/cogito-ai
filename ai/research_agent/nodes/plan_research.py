@@ -10,7 +10,7 @@ from ai.research_agent.schemas.ResearchEffort import ResearchEffort
 from ai.research_agent.sources.stringify import stringify_query_results
 
 # --- Define constants ---
-MAX_ITERATIONS_DEEP = 8
+MAX_ITERATIONS_DEEP = 7
 MAX_ITERATIONS_SIMPLE = 4
 MAX_TOKENS = 100000
 
@@ -18,7 +18,7 @@ SAMPLE_RESPONSE = \
 """
 # Standard query (don't put ANY comments in your response)
 {
-  "long_term_plan":  "sample plan",  # long term research plan, can be over multiple iterations, can be null to end research
+  "long_term_plan":  "sample plan",  # long term research plan, includes multiple steps over multiple iterations, can be null to end research
   "short_term_plan": "sample plan",  # short term plan for the current iteration, can be null to end research
   "vector_db_queries": [  # optional field, must be a list of query + filter objects or null
     {
@@ -137,30 +137,31 @@ def plan_research(state: ResearchAgentState, status: Status | None):
     system_msg = SystemMessage(
         content=(
             "## YOUR ROLE\n"
-            "You are a PLANNER NODE WITHIN AN AGENT. Analyze the user's question and generate a plan + search queries, "
-            "or stop research by returning null for all fields. You do not continue the conversation.\n\n"
+            "You are a PLANNER NODE WITHIN AN AGENT. Analyze the user's question and generate a plan over multiple "
+            "iterations plan + search queries, or stop research by returning null for all fields. You do not continue "
+            "the conversation.\n\n"
 
-            f"## ITERATION {research_iterations} (1-indexed):\n"
+            f"## YOU ARE ON ITERATION #{research_iterations} (1-indexed):\n"
             f"For this task, your hard limit is {max_iterations}, which will be your final iteration. If you finish "
-            f"early, ensure you have at least three successful and relevant query unless nothing's working.\n\n"
+            f"early, ensure you have at least three successful and relevant queries unless nothing's working.\n\n"
 
             "## SOURCES\n"
-            "1. **Vector DB**: Primary source chunks from Project Gutenberg philosophy texts\n"
+            "1. **Project Gutenberg**: A vector db of primary source chunks from Project Gutenberg philosophy texts\n"
             "2. **SEP**: Stanford Encyclopedia articles for conceptual overviews\n\n"
 
             "## PLANS"
-            "- `long_term_plan`: Overall research plan, can span multiple iterations. Describes potential queries, "
-            "sources and/or philosophers to include, and sequential tool calls.\n"
-            "- `short_term_plan`: Specific plan for this iteration only. A one-or-two sentences description of what "
-            "you aim to achieve this iteration. Use present continuous tense, such as 'I'm searching for...' or 'Looking "
-            "for...' etc. Try to end in '...'.\n\n"
+            "- `long_term_plan`: Overall research plan, includes steps to take over multiple iterations. Describes "
+            "area of focus over each iteration (1-n) and includes guideline for when to end research."
+            "- `short_term_plan`: Description of actions for this iteration only. A one-sentence description of what "
+            "you are doing this iteration. Use present continuous tense, such as 'I'm searching for...' or 'Looking "
+            "for...' etc. Always end in '...'.\n\n"
 
             "## SOURCE SELECTION\n"
-            "**Vector DB**: Named philosophers, specific passages, textual evidence, author's development of ideas\n"
+            "**Project Gutenberg Vector DB**: Named philosophers, specific passages, textual evidence, author's development of ideas\n"
             "**SEP**: General concepts, movements, debates, overviews, multiple philosophers, scholarly interpretation\n"
             "**Both**: Idea genealogy, comparing sources with concepts, evidence + interpretation\n\n"
 
-            "## QUERY RULES\n"
+            "## QUERY RULES PER ITERATION\n"
             "- MAX 3 queries for Project Gutenberg Vector DB (for this iteration, not total)\n"
             "- Max 1 queries for SEP (for this iteration, not total)\n"
             "- MIN 1 successful query total across all sources\n"
@@ -178,16 +179,10 @@ def plan_research(state: ResearchAgentState, status: Status | None):
             "Set all fields, `long_term_plan`, `short_term_plan`, `stanford_encyclopedia_queries`, "
             "`vector_db_queries`, and `ids_to_remove` to `null`\n\n"
             
-            "## HOW TO REMOVE RESOURCES"
+            "## REMOVE UNNECESSARY RESOURCES\n"
             "If there are specific sources or chunks that are irrelevant or unhelpful from past research, you can "
-            "optionally include an `ids_to_remove` field with a list of their IDs to delete them from future consideration."
+            "include an `ids_to_remove` field with a list of their IDs to delete them from future consideration. "
             "Prune unnecessary sources as needed.\n\n"
-            
-            "## IN YOUR REASONING/OUTPUT:\n"
-            "Do NOT formulate the final response. Reason about the comprehensiveness of prior research and what is needed "
-            "next, if anything. Consider how many iterations have occurred and the complexity of the question. You "
-            "should rarely revise your long term plan, only doing so when needed. Revise your short term plan every"
-            "iteration.\n\n"
             
             "## ADVICE:\n"
             "- If a user asks about previous research that you don't have, re-query for those sources.\n"
@@ -205,9 +200,6 @@ def plan_research(state: ResearchAgentState, status: Status | None):
             "Your output and the JSON response should be as a message to the user, not in a tool call or anything else. "
             "Just respond as described in the normal 'content' section of your message. Do not invoke ANY tool calls, "
             "you don't have access to any.\n\n"
-            
-            "## STRICT RULES\n"
-            "NEVER repeat queries.\n"
         )
     )
     research_history_message = SystemMessage(content=(
@@ -219,7 +211,7 @@ def plan_research(state: ResearchAgentState, status: Status | None):
         f"```\n{stringify_query_results(query_results)}\n```\n\n"
     ))
     previous_conversation_message = SystemMessage(content=(
-        "CONVERSATION HISTORY (for your context):\n```" + str(conversation[:-1]) + "\n```\n^ Previous conversation.\n"
+        "CONVERSATION HISTORY (for your context):\n```" + str(conversation) + "\n```\n^ Previous conversation.\n"
     ))
 
     # Invoke LLM with structured output and retry parsing on invalid JSON
@@ -231,7 +223,7 @@ def plan_research(state: ResearchAgentState, status: Status | None):
 
     while attempt < max_parse_attempts:
         try:
-            llm_output = safe_invoke(model, [previous_conversation_message, research_history_message, conversation[-1], system_msg], reasoning_effort)
+            llm_output = safe_invoke(model, [previous_conversation_message, research_history_message, system_msg], reasoning_effort)
             content = extract_content(llm_output)
             result = parser.parse(content)
             break

@@ -4,6 +4,10 @@ venv/
 ENV/
 env/
 
+# Distribution / packaging
+dist/
+build/
+
 # IDE / editor
 .idea/
 

@@ -45,11 +45,19 @@ def classify_research_needed(state: ResearchAgentState, status: Status | None):
         "## STRICT RULES\n"
         "NEVER make tool calls of any kind. YOU DO NOT PERFORM RESEARCH. YOU WILL NOT MAKE ANY TOOL CALLS.\n"
     ))
+    conversation_context_message = SystemMessage(content=(
+        "Here is the conversation so far (most recent messages last):\n\n"
+        f"{''.join([f'- {msg.content}\n' for msg in conversation[-5:]])}\n"
+    ))
 
     attempts = 0
     while True:
         # Invoke model and extract output
-        result = extract_content(safe_invoke(classifier_model, [*conversation[-3:], system_msg], classifier_reasoning))
+        result = extract_content(
+            safe_invoke(
+                classifier_model, [conversation_context_message, system_msg], classifier_reasoning
+            )
+        )
 
         if attempts >= 3:
             # After several failed attempts, default to simple research

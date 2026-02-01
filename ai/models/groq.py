@@ -12,7 +12,7 @@ oss_120b_low = ChatGroq(
 
 oss_120b_med = ChatGroq(
     model="openai/gpt-oss-120b",
-    temperature=0.3,
+    temperature=0.5,
     reasoning_effort="medium",
     reasoning_format="parsed"
 )
@@ -24,9 +24,9 @@ oss_20b_low_temp = ChatGroq(
     reasoning_format="parsed",
 )
 
-oss_20b_med_temp_med_reasoning = ChatGroq(
+oss_20b_high_temp_med_reasoning = ChatGroq(
     model="openai/gpt-oss-20b",
-    temperature=0.4,
+    temperature=0.7,
     reasoning_effort="medium",
     reasoning_format="parsed",
 )
@@ -39,4 +39,11 @@ llama_8b_instant = ChatGroq(
 llama_4_scout = ChatGroq(
     model="meta-llama/llama-4-scout-17b-16e-instruct",
     temperature=0.0
+)
+
+qwen3_32b = ChatGroq(
+    model="qwen/qwen3-32b",
+    temperature=0.3,
+    reasoning_effort="default",  # other option is 'none'
+    reasoning_format="parsed"
 )
