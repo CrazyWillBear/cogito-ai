@@ -5,6 +5,25 @@ from docker import from_env
 from rich.status import Status
 
 
+CONTAINERS_CONFIG = [
+    {
+        "name": "cogito-vectors",
+        "image": "crazywillbear/cogito-vectors:latest",
+        "ports": {'6333/tcp': 6333, '6334/tcp': 6334},
+        "environment": {"QDRANT__SERVICE__API_KEY": "default"}
+    },
+    {
+        "name": "cogito-postgres",
+        "image": "crazywillbear/cogito-filters-postgres:latest",
+        "ports": {'5432/tcp': 5432},
+        "environment": {
+            "POSTGRES_USER": "default",
+            "POSTGRES_PASSWORD": "default",
+            "POSTGRES_DB": "cogito"
+        }
+    }
+]
+
 def manage_containers(status: Status):
     """Ensure required Docker containers are running."""
 
@@ -14,29 +33,10 @@ def manage_containers(status: Status):
         client = from_env()
 
     except Exception as e:
-        print(f"::Could not connect to Docker. Is the service running? Are you on Python <=3.12.0\n{e}")
+        print(f"Could not connect to Docker. Is the service running? Are you on Python <=3.12.0\n{e}")
         return
 
-    containers_config = [
-        {
-            "name": "cogito-vectors",
-            "image": "crazywillbear/cogito-vectors:latest",
-            "ports": {'6333/tcp': 6333, '6334/tcp': 6334},
-            "environment": {"QDRANT__SERVICE__API_KEY": "default"}
-        },
-        {
-            "name": "cogito-postgres",
-            "image": "crazywillbear/cogito-filters-postgres:latest",
-            "ports": {'5432/tcp': 5432},
-            "environment": {
-                "POSTGRES_USER": "default",
-                "POSTGRES_PASSWORD": "default",
-                "POSTGRES_DB": "cogito"
-            }
-        }
-    ]
-
-    for config in containers_config:
+    for config in CONTAINERS_CONFIG:
         try:
             # 1. Try to get the container by name
             container = client.containers.get(config["name"])
@@ -44,16 +44,16 @@ def manage_containers(status: Status):
             if container.status == "running":
                 status.update(status=f"{config['name']} is already running")
             else:
-                status.update(status=f"::{config['name']} exists but is stopped. Starting...")
+                status.update(status=f"{config['name']} exists but is stopped. Starting...")
                 container.start()
                 if _wait_for_running(container):
-                    status.update(status=f"::{config['name']} launched successfully.")
+                    status.update(status=f"{config['name']} launched successfully.")
                 else:
-                    status.update(status=f"::{config['name']} failed to reach 'running' in time.")
+                    status.update(status=f"{config['name']} failed to reach 'running' in time.")
 
         except Exception:
             # 2. If it doesn't exist, pull and run
-            status.update(status=f"::{config['name']} not found. Pulling image and starting...")
+            status.update(status=f"{config['name']} not found. Pulling image and starting...")
             container = client.containers.run(
                 config["image"],
                 name=config["name"],
@@ -62,9 +62,9 @@ def manage_containers(status: Status):
                 environment=config.get("environment")
             )
             if _wait_for_running(container):
-                status.update(status=f"::{config['name']} launched successfully.")
+                status.update(status=f"{config['name']} launched successfully.")
             else:
-                status.update(status=f"::{config['name']} failed to reach 'running' in time.")
+                status.update(status=f"{config['name']} failed to reach 'running' in time.")
 
 
 def _set_env_variables():

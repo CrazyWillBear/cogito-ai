@@ -8,13 +8,13 @@ langgraph
 openai
 protobuf
 psycopg2_binary
-pydantic
 python-dotenv
 qdrant_client
 rapidfuzz
 tiktoken
 typing_extensions
-
 langchain-ollama
 rich
+pydantic
 docker
+questionary

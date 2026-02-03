@@ -12,12 +12,12 @@ RESEARCH_AGENT_MODEL_CONFIG = {
 }
 
 # Local model config
-# RESEARCH_AGENT_MODEL_CONFIG = {
+#RESEARCH_AGENT_MODEL_CONFIG = {
 #     "create_conversation": (gemma3_4b, None),    # Summarization task
 #     "research_classifier": (gemma3_4b, None),    # Slightly nuanced classification task
 #     "extract_text": (gemma3_4b, None),           # Text extraction task
 #     "plan_research": (gemma3_4b, None),          # Moderate complexity planning + structured output task
 #     "write_response_no_research": (gemma3_4b, None),  # Moderate complexity evidence synthesis task
 #     "write_response_research": (gemma3_4b, None)     # Moderate complexity evidence synthesis task
-# }
+#}
 
