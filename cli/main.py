@@ -2,7 +2,8 @@ from rich.console import Console
 
 from cli.args.args_handler import execute_args
 
-START_TEXT = r"""
+START_TEXT = \
+r"""-=-=-=-=-=-
  .--.              _  .-.
 : .--'            :_;.' `.
 : :    .--.  .--. .-.`. .'.--.

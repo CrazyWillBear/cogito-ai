@@ -188,6 +188,9 @@ def plan_research(state: ResearchAgentState, status: Status | None):
             "- If a user asks about previous research that you don't have, re-query for those sources.\n"
             "- Think about what sources (specific books, essays, etc.) would be best to answer the question.\n"
             "- If a resource is missing from the database, avoid re-querying it.\n"
+            "- **IMPORTANT**: If a vector db query is returning text from a section that isn't written by the author, "
+            "such as introduction or table of contents, rewrite your query to search semantically to avoid getting "
+            "such a section. Search for a while if needed.\n"
             "- IF A PREVIOUS QUERY RETURNED IRRELEVANT INFORMATION, REWRITE THAT QUERY TO BE MORE FOCUSED / OTHERWISE "
             "FIX IT AND TRY AGAIN.\n\n"
             

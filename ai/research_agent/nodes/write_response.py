@@ -45,7 +45,8 @@ def write_response(state: ResearchAgentState, status: Status | None):
 
         "## GUIDELINES\n"
         "- Answer the user's question directly.\n"
-        "- Select only the relevant parts of the resources.\n"
+        "- Select only the relevant parts of the resources, do this in your reasoning and write the quotes you want to "
+        "use alongside the citation they come from (ensure citation accuracy).\n"
         "- Response concisely, organize your response tightly (clean structure, minimal fluff).\n"
         "- NEVER, EVER, UNDER ANY CIRCUMSTANCES use information outside the resources or make up information/research.\n"
         "- Sources sometimes have weird spacing and characters. Use whatever feels best in your quotes and citations (there "
@@ -63,6 +64,12 @@ def write_response(state: ResearchAgentState, status: Status | None):
         "your best to answer the question given the resources you DO have access to.\n\n"
 
         "## MOST IMPORTANT INSTRUCTIONS (READ CAREFULLY)\n"
+        "- NEVER QUOTE AN SEP ENTRY AND ATTRIBUTE IT TO THE PRIMARY AUTHOR BEING ANALYZED IN SAID ENTRY. For example, "
+        "don't cite the SEP entry on Marcus Aurelius and attribute a quote from the SEP to Marcus Aurelius. The SEP is "
+        "a secondary source, so all SEP quotes should be cited as from the SEP and not the primary author. THIS IS TRUE "
+        "FOR ALL SECONDARY SOURCES, NEVER ATTRIBUTE A QUOTE FROM A SECONDARY SOURCE TO THE AUTHOR IT DISCUSSES.\n"
+        "- In your reasoning, IDENTIFY RELEVANT QUOTES AND LIST THEM ALONGSIDE AN ACCURATE CITATION. You're only allowed "
+        "to use quotes that you identified in your reasoning.\n"
         "- NEVER make tool calls of any kind.\n"
         "- NEVER, EVER make up quotes, citations, or references. NEVER reference sources you don't have. THIS IS THE MOST "
         "CRITICAL INSTRUCTION TO FOLLOW. NEVER FABRICATE INFORMATION OR REFERENCE SOURCES YOU DON'T HAVE.\n"

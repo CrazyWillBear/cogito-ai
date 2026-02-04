@@ -11,12 +11,10 @@ from cli.conversations.conversations import save_conversation, Conversation, get
 from cli.output.panels import ai_bubble, system_panel
 
 
-
-
 def conversation_loop(console: Console, conversation: Conversation | None):
     """Main agent conversation loop."""
 
-    console.print("-=-=-=-=-=-\n\n::Type 'exit' or 'quit' to end the conversation.\n", style="bold gold3")
+    console.print("\n::Type 'exit' or 'quit' to end the conversation.\n", style="bold gold3")
 
     # Build conversation state
     if conversation:
@@ -96,17 +94,22 @@ def conversation_loop(console: Console, conversation: Conversation | None):
 
     except KeyboardInterrupt:
         console.print("\n::Quitting...", style="dim italic")  # New line for spacing
-        exit(-1)
+        return
     except Exception as e:
         print(f"::Error while running agent:\n{e}")
 
-    finally:
-        # ---- Cleanup ------------------------------------------------------
+    # ---- Cleanup ------------------------------------------------------
+    try:
         agent.close()
 
         if not conversation_name:
-            conversation_name = Prompt.ask("Enter a name for this conversation", default=f"Conversation {conversation_id}")
+            conversation_name = Prompt.ask("\n::Enter a name for this conversation", default=f"Conversation {conversation_id}")
 
         messages_dict = messages_to_dict(messages)
         save_conversation(messages_dict, conversation_id, conversation_name)
         console.print(system_panel("Session ended. Logs written to disk."))
+    except KeyboardInterrupt:
+        console.print("\n::Quitting before cleanup...", style="dim italic")  # New line for spacing
+        return
+    except Exception as e:
+        print(f"::Error during cleanup:\n{e}")

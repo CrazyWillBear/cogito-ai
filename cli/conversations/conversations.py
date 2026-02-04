@@ -67,24 +67,26 @@ def user_select_conversation(console: Console) -> Conversation | None:
     conversations = get_conversations()
 
     # Use Questionary for the interaction
-    console.print("Select a conversation to resume or start a new one:", style="bold gold3")
+    console.print("::Select a conversation to resume or start a new one", style="bold gold3")
     answer = questionary.select(
         "",
-        choices=["New conversation", *(f"{c['name']} - {c['id']}" for c in conversations)],
+        choices=["New conversation", *(f"'{c['name']}' (ID={c['id']})" for c in conversations)],
         style=questionary.Style([
-            ('qmark', 'fg:cyan bold'),
+            ('qmark', 'fg:gold bold'),
             ('question', 'bold fg:gold'),
-            ('pointer', 'fg:cyan bold'),
-            ('highlighted', 'fg:cyan'),
+            ('pointer', 'fg:gold bold'),
+            ('highlighted', 'fg:gold'),
             ('selected', 'fg:green'),
         ])
     ).ask()
 
-    if answer is None or answer == "New conversation":
+    if answer == "New conversation":
         return None
+    if answer is None:
+        exit(-1)  # User cancelled
 
     # Extract the conversation ID from the selected answer
-    selected_id = int(answer.split(" - ")[-1])
+    selected_id = int(answer.split("ID=")[-1].replace(")", "").strip())
 
     # Find and return the selected conversation
     for conv in conversations:
