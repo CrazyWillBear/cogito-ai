@@ -16,10 +16,10 @@ Code and license at https://github.com/CrazyWillBear/cogito-ai
 -=-=-=-=-=-
 """
 
-def main():
+def main(version: str):
     """Main entry point for the Cogito CLI application."""
 
     # Execute args
     console = Console()
     console.print(START_TEXT, style="bold gold3")
-    execute_args(console)
+    execute_args(console, version)

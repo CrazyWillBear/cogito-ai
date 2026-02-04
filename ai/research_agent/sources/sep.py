@@ -145,8 +145,8 @@ def _select_relevant_sections(sections, conversation, article_title):
     ))
 
     try:
-        model, reasoning_effort = RESEARCH_AGENT_MODEL_CONFIG.get("extract_text")
-        content = extract_content(safe_invoke(model, [conversation_context_message, system_msg], reasoning_effort))
+        model = RESEARCH_AGENT_MODEL_CONFIG.get("extract_text")
+        content = extract_content(safe_invoke(model, [conversation_context_message, system_msg]))
 
         # Try to extract JSON from the response
         # Remove markdown code blocks if present

@@ -8,11 +8,11 @@ from cli.args.commands.list_conversations import list_conversations
 from cli.output.patch_markdown_tables import patch_markdown_tables
 
 
-def execute_args(console: Console):
+def execute_args(console: Console, version: str):
     """Execute command-line argument handling."""
 
     # Get args
-    args = _parse_args()
+    args = _parse_args(version)
     patch_markdown_tables()
 
     # If list flag is set
@@ -42,7 +42,7 @@ def execute_args(console: Console):
     user_option_conversation(console)
     return
 
-def _parse_args():
+def _parse_args(version: str):
     """Parse command-line arguments."""
 
     parser = argparse.ArgumentParser()
@@ -80,6 +80,13 @@ def _parse_args():
         type=int,
         metavar="CONVERSATION_ID",
         action="store"
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        help="displays version information",
+        action="version",
+        version=f"Current version: {version}"
     )
 
     return parser.parse_args()

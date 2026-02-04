@@ -111,11 +111,11 @@ def write_response(state: ResearchAgentState, status: Status | None):
     # Invoke LLM depending on complexity and extract output
     system_msg = system_msg_research if query_results else system_msg_no_research
     if research_effort == ResearchEffort.DEEP or research_effort == ResearchEffort.SIMPLE:
-        model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["write_response_research"]
-        result = safe_invoke(model, [*conversation, research_history_message, system_msg], reasoning)
+        model = RESEARCH_AGENT_MODEL_CONFIG["write_response_research"]
+        result = safe_invoke(model, [*conversation, research_history_message, system_msg])
     else:
-        model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["write_response_no_research"]
-        result = safe_invoke(model, [*conversation, system_msg], reasoning)
+        model = RESEARCH_AGENT_MODEL_CONFIG["write_response_no_research"]
+        result = safe_invoke(model, [*conversation, system_msg])
     text = extract_content(result)
 
     return {"response": text}

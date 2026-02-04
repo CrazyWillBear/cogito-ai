@@ -1,4 +1,3 @@
 from cli.main import main
 
-# CLI main function
-main()
+main(version="0.1.0")

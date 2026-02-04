@@ -218,7 +218,7 @@ def plan_research(state: ResearchAgentState, status: Status | None):
     ))
 
     # Invoke LLM with structured output and retry parsing on invalid JSON
-    model, reasoning_effort = RESEARCH_AGENT_MODEL_CONFIG["plan_research"]
+    model = RESEARCH_AGENT_MODEL_CONFIG["plan_research"]
     parser = JsonOutputParser()
     max_parse_attempts = 5
     attempt = 0
@@ -226,7 +226,7 @@ def plan_research(state: ResearchAgentState, status: Status | None):
 
     while attempt < max_parse_attempts:
         try:
-            llm_output = safe_invoke(model, [previous_conversation_message, research_history_message, system_msg], reasoning_effort)
+            llm_output = safe_invoke(model, [previous_conversation_message, research_history_message, system_msg])
             content = extract_content(llm_output)
             result = parser.parse(content)
             break

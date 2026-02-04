@@ -2,60 +2,44 @@
 
 ## One-liner
 
-A chatbot-style agent for philosophy research that performs research to gather evidence and synthesize answers.
+A chatbot agent for philosophy that performs research to gather evidence and synthesize answers.
 
 ## Summary
 
-Cogito AI is an AI research assistant designed to help users explore philosophical questions by searching authoritative sources like the Stanford Encyclopedia of Philosophy and a curated set of Project Gutenberg texts. It leverages LLMs to generate context-aware queries, retrieve relevant sources, and synthesize well-supported answers with full citations. The model architecture is fully customizable, including support for Groq, OpenAI, and local LLMs (see more below).
+Cogito AI is an agentic chatbot for philosophy research. Cogito searches authoritative sources like the Stanford Encyclopedia of Philosophy and a curated set of Project Gutenberg (primary) texts. It uses a ReAct loop to plan and execute its research. In doing so, it generates context-aware queries, retrieves relevant sources, and synthesizes well-supported answers with full citations. The model architecture is optimized for cost, accuracy, and output quality; it's also customizable (see [Model Configuration](#model-configuration) below).
 
 ## Realtime Demo
 
 ### Defining philosophical concept
 
-<img src="https://mirrors.williamchastain.com/images/Cogito%20CLI%20Demo.gif" alt="Cogito Demo Gif" width="600"/>
-
-### Comparing philosophers' ideas
-
-<img src="https://mirrors.williamchastain.com/images/Cogito%20CLI%20Demo%202.gif" alt="Cogito Demo Gif 2" width="600"/>
+<video src="https://github.com/user/repo/raw/main/assets/demo.mp4" controls="controls" style="max-width: 600px;"></video>
 
 ## Features
 
-- Search across the Stanford Encyclopedia of Philosophy
-- Semantic search across 1000+ select Project Gutenberg philosophy sources
-- Conversation-aware query generation with source + author filtering
-- Parallel resource retrieval and text-extraction
-- Planning and iterative research with chain-of-thought reasoning
-- Citation-backed responses with quoted evidence
-- Low hallucination rate from prompt/evidence formatting and source grounding
+- ReAct loop for planning and executing research.
+- Search across the Stanford Encyclopedia of Philosophy.
+- Search across 1000+ select Project Gutenberg philosophy sources.
+- Conversation-aware query generation with source + author filtering.
+- Parallel resource retrieval and text-extraction.
+- Multistep reasoning for formulating and writing responses.
+- Citation-backed quotes in responses.
+- Low hallucination rate from prompt/evidence formatting and source grounding.
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.13
 - Linux / macOS / Windows
-- Docker
-- Groq API key (or OpenAI API key / local setup for custom configuration, see below)
+- Docker (user must also have Docker permissions)
+- Groq API key
+- OpenAI API key
+
+To get a Groq API key, go [here](https://console.groq.com/keys). To get an OpenAI API key, go [here](https://platform.openai.com/api-keys).
 
 ## Quick Start
 
-### 1. Set up databases
+### 1. Set up Python environment
 
-Pull and run the pre-populated databases:
-```bash
-# Qdrant vector database (philosophy embeddings, only uses gRPC)
-docker run -p 6333:6333 -p 6334:6334 \
-  -e QDRANT__SERVICE__API_KEY=your-secret-key \
-  crazywillbear/cogito-vectors:latest
-
-# PostgreSQL filters database (metadata)
-docker run -d \
-  -p 5432:5432 \
-  -e POSTGRES_USER=your-username \
-  -e POSTGRES_PASSWORD=your-password \
-  -e POSTGRES_DB=cogito \
-  crazywillbear/cogito-filters-postgres:latest
-```
-
-### 2. Set up Python environment
+#### Linux / macOS
 ```bash
 # Create and activate virtual environment
 python -m venv .venv
@@ -65,39 +49,40 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Configure environment variables
+#### Windows
+```powershell
+# Create and activate virtual environment
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 
-Copy `.env.example` to `.env` and update with the credentials you defined above:
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 2. Set environment variables
+
+- A **Groq API key** is required for the default configuration, but you can customize in `ai/models/model_config.py` if you want to use different models or providers.
+- An **OpenAI API key** is needed regardless, as it's used for text embedding generation.
+
+
+
+#### Linux / macOS
+
 ```bash
-cp .env.example .env
+# Add this to your .bashrc, .zshrc, .<whatever>rc file or set directly in terminal before running
+export GROQ_API_KEY=your_groq_api_key_here
+export OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-Edit `.env`:
-```
-# Qdrant Configuration
-COGITO_QDRANT_URL=localhost
-COGITO_QDRANT_PORT=6334
-COGITO_QDRANT_API_KEY=your-secret-key
-COGITO_QDRANT_COLLECTION=philosophy
+#### Windows
 
-# PostgreSQL Configuration
-COGITO_POSTGRES_HOST=localhost
-COGITO_POSTGRES_PORT=5432
-COGITO_POSTGRES_DBNAME=cogito
-COGITO_POSTGRES_USER=your_user_here
-COGITO_POSTGRES_PASSWORD=your_password_here
+You need to use the System Environment Variables settings in Windows to set these. Follow [this tutorial](https://www.elevenforum.com/t/create-new-environment-variables-in-windows-11.22062/) following option 1, creating a new user variable for each of the above keys (where the variable name is `GROQ_API_KEY` and `OPENAI_API_KEY`, respectively, and the variable value is the key).
 
-# OpenAI (or configure local LLM)
-GROQ_API_KEY=your-groq-key
-```
+### 3. Run
 
-### 4. Run
 ```bash
 # For terminal interface
 python cogito.py
-
-# For gRPC server, where in production environments you must ensure Qdrant TLS is configured in `dbs/Qdrant.py`
-python cogito_server.py
 ```
 
 ## Databases
@@ -105,37 +90,21 @@ python cogito_server.py
 ### Qdrant Vector Database
 - **212,248 embeddings** from Project Gutenberg philosophy texts
 - Chunked with metadata (section, source title, author(s))
-- Collection: ``
 - [Docker Hub](https://hub.docker.com/repository/docker/crazywillbear/cogito-vectors)
 
 ### PostgreSQL Filters Database
 - Metadata for filtering by author and source
-- Table: `filters`
 - [Docker Hub](https://hub.docker.com/repository/docker/crazywillbear/cogito-filters-postgres)
 
-## Architecture & Important Files (quick map)
+## Model Configuration
 
-- `cogito.py` — CLI loop.
-- `cogito_server.py` — gRPC server entrypoint.
-- `cogito_servicer/` — gRPC server implementation.
-- `ai/research_agent/` — research agent graph, nodes, and schemas.
-- `ai/model_config.py` — model config.
-- `dbs/` — Qdrant and PostgreSQL classes.
-- `embed/` — embedding logic.
+It's recommended to leave LLM configuration as-is for best results (current models are optimized for speed, cost, and accuracy). If you wish to customize, here's how:
 
-## Configuration
-
-It's recommended to leave LLM configuration as-is for best results (current models are optimized for speed, cost, and
-accuracy.) If you wish to customize, here are the main areas:
-
-- **LLM configuration**: See `ai/models/model_config.py`
-  - Create LangChain `ChatModel` instances with different models, temperature, max tokens, etc. (ideally in something
-like `ai/models/<your_model>.py`)
-  - You can set reasoning levels for newer OpenAI and Anthropic models.
-- **Database connections**: Configured via `.env` file
+- Create LangChain `ChatModel` instances with different models, temperature, max tokens, etc. (check `ai/models/` for examples).
+- In `ai/research_agent/model_config.py`, assign your chosen models to their tasks.
 
 ## License
 
 Copyright (c) 2025 William Chastain. All rights reserved.
 
-This software is licensed under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). This project is source‑available, but non‑commercial. See [LICENSE](LICENSE.md) for details.
+This software is licensed under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). This project is source‑available, but *CANNOT BE USED* for commerical purposes. In other words, don't sell my software or make money off it. See [LICENSE](LICENSE.md) for details.

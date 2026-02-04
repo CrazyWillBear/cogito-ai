@@ -21,7 +21,7 @@ def create_conversation(state: ResearchAgentState, status: Status | None):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     tokens = sum(len(tokenizer.encode(msg.content)) for msg in conversation)
     if tokens > token_limit:
-        model, reasoning = RESEARCH_AGENT_MODEL_CONFIG["create_conversation_summary"]
+        model = RESEARCH_AGENT_MODEL_CONFIG["create_conversation_summary"]
 
         # Build prompt (system and user message)
         system_msg = HumanMessage(content=(
@@ -36,7 +36,7 @@ def create_conversation(state: ResearchAgentState, status: Status | None):
         ))
 
         # Invoke model and extract content
-        result = safe_invoke(model, [*conversation[:-1], system_msg], reasoning)
+        result = safe_invoke(model, [*conversation[:-1], system_msg])
         conversation = [SystemMessage(content=f"## CONVERSATION SUMMARY BEFORE THIS POINT\n{extract_content(result)}"), conversation[-1]]
 
     # Initialize remaining required keys in state

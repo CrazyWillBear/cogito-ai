@@ -17,7 +17,7 @@ def classify_research_needed(state: ResearchAgentState, status: Status | None):
     conversation = state.get("conversation", [])
 
     # Get configured model
-    classifier_model, classifier_reasoning = RESEARCH_AGENT_MODEL_CONFIG["research_classifier"]
+    classifier_model = RESEARCH_AGENT_MODEL_CONFIG["research_classifier"]
 
     # Build prompt (system and user message)
     system_msg = SystemMessage(content=(
@@ -55,7 +55,7 @@ def classify_research_needed(state: ResearchAgentState, status: Status | None):
         # Invoke model and extract output
         result = extract_content(
             safe_invoke(
-                classifier_model, [conversation_context_message, system_msg], classifier_reasoning
+                classifier_model, [conversation_context_message, system_msg]
             )
         )
 
