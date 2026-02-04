@@ -12,7 +12,7 @@ Cogito AI is an agentic chatbot for philosophy research. Cogito searches authori
 
 ### Defining philosophical concept
 
-<video src="https://mirrors.williamchastain.com/videos/Cogito-Demo.mp4" controls="controls" style="max-width: 600px;"></video>
+<img src="https://mirrors.williamchastain.com/images/Cogito-CLI-Demo.gif"></img>
 
 ## Features
 
