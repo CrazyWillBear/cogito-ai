@@ -30,8 +30,8 @@ Cogito AI is an agentic chatbot for philosophy research. Cogito searches authori
 - Python 3.13
 - Linux / macOS / Windows
 - Docker (user must also have Docker permissions)
-- Groq API key
 - OpenAI API key
+- Groq API key (required for default model config, see [Model Configuration](#model-configuration) below)
 
 To get a Groq API key, go [here](https://console.groq.com/keys). To get an OpenAI API key, go [here](https://platform.openai.com/api-keys).
 
@@ -63,8 +63,6 @@ pip install -r requirements.txt
 
 - A **Groq API key** is required for the default configuration, but you can customize in `ai/models/model_config.py` if you want to use different models or providers.
 - An **OpenAI API key** is needed regardless, as it's used for text embedding generation.
-
-
 
 #### Linux / macOS
 
