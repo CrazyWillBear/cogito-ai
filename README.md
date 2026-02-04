@@ -61,7 +61,7 @@ pip install -r requirements.txt
 
 ### 2. Set environment variables
 
-- A **Groq API key** is required for the default configuration, but you can customize in `ai/models/model_config.py` if you want to use different models or providers.
+- A **Groq API key** is required for the default configuration (see [Model Configuration](#model-configuration) below).
 - An **OpenAI API key** is needed regardless, as it's used for text embedding generation.
 
 #### Linux / macOS
